@@ -1,6 +1,8 @@
 class GameState:
     def __init__(self, rows=DEFAULT_BOARD_SIZE, columns=DEFAULT_BOARD_SIZE, board=None, score=0, done=False):
         super(GameState, self).__init__()
+        self.attacker = None  # can remove the defender state as it will always be the opposition of the attacker
+        self.defender = None
         pass
         # self._done = done
         # self._score = score
@@ -43,6 +45,13 @@ class GameState:
         pass
 
     def apply_action(self, action):
+        pass
+
+    def update_state(self):
+        """
+        updates the state of the game
+        :return:
+        """
         pass
 
     def generate_successor(self, agent_index=0, action=Action.STOP):

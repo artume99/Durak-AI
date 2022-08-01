@@ -1,14 +1,20 @@
 from random import shuffle
 from Card import Card
+from itertools import product
 
 
 class Deck:
+    """
+
+    """
     def __init__(self):
         self.suits = ['Spades', 'Hearts', 'Diamonds', 'Clubs']
-        self.ranks = list(range(2, 15))
+        self.ranks = list(range(6, 15))  # not supposed to use 2-5 ranked cards
         self.cards_list = []
         self.uber = None
         self.top_card = None
+        # self.opened_cards = []
+        # self.tossed_cards = []  # cards that have been deleted from the game
         self.build()
 
     def build(self):
@@ -24,7 +30,8 @@ class Deck:
         self.uber = self.top_card.suit
         for c in self.cards_list:
             c.uber = self.uber
-        self.cards_list.insert(0, self.top_card)
+        self.cards_list.insert(0, self.top_card)  # should be the last card of the card list
+        # self.opened_cards.insert(0, self.top_card)
 
     def shuffle(self):
         shuffle(self.cards_list)
@@ -37,3 +44,11 @@ class Deck:
 
     def __str__(self):
         return "Deck has {} cards left".format(len(self.cards_list))
+
+    def hand_out_cards(self, num):
+        """
+        give a maximum of num cards
+        :param num:
+        :return:
+        """
+
