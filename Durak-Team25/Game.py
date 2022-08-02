@@ -1,6 +1,7 @@
 import abc
 
 import pygame
+import numpy as np
 from Deck import Deck
 from Board import Board
 from Player import Player
@@ -20,6 +21,9 @@ class Agent(object):
 
 
 class RandomOpponentAgent(Agent):
+    """
+    The computer (not our AI)
+    """
     def get_action(self, game_state):
         pass
 
@@ -28,8 +32,8 @@ class Game:
     def __init__(self):
         self.deck = Deck()
         self.board = Board()
-        self.player1 = Player(Agent())
-        self.player2 = Player(RandomOpponentAgent())
+        self.player = Player(self.deck)
+        self.opponent = RandomOpponentAgent()
         self._should_quit = False
         self._state = None
 
@@ -59,14 +63,14 @@ class Game:
         """
         chosen_shape = self.deck.top_card.suit
         min_rank = 15
-        starting_attacking_player = self.player1
-        for card in self.player1.hand:
+        starting_attacking_player = self.player
+        for card in self.player.hand:
             if card.suit == chosen_shape and card.rank < min_rank:
-                starting_attacking_player = self.player1
+                starting_attacking_player = self.player
                 min_rank = card.rank
-        for card in self.player2.hand:
+        for card in self.opponent.hand:
             if card.suit == chosen_shape and card.rank < min_rank:
-                starting_attacking_player = self.player2
+                starting_attacking_player = self.opponent
                 min_rank = card.rank
         return starting_attacking_player
 
