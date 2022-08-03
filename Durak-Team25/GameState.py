@@ -1,19 +1,14 @@
 class GameState:
-    def __init__(self, rows=DEFAULT_BOARD_SIZE, columns=DEFAULT_BOARD_SIZE, board=None, score=0, done=False):
+    def __init__(self, done=False):
         super(GameState, self).__init__()
         self.attacker = None  # can remove the defender state as it will always be the opposition of the attacker
         self.defender = None
-        pass
-        # self._done = done
-        # self._score = score
-        # if board is None:
-        #     board = np.zeros((rows, columns), dtype=np.int32)
-        # self._board = board
-        # self._num_of_rows, self._num_of_columns = rows, columns
+        self.winner = None
+        self._done = done
 
-    # @property
-    # def done(self):
-    #     return self._done
+    @property
+    def done(self):
+        return self._done
     #
     # @property
     # def score(self):

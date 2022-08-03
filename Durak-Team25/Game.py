@@ -1,13 +1,18 @@
 import abc
+from enum import Enum
 
 import pygame
 import numpy as np
 from Deck import Deck
 from Board import Board
-from Player import Player
 from typing import List
 from types import FunctionType
 
+from GameState import GameState
+class Action(Enum):
+    BETA = 0
+    TAKE = 1
+    STOP = 2
 
 class Agent(object):
     def __init__(self, deck):
@@ -43,15 +48,14 @@ class RandomOpponentAgent(Agent):
 
 
 class Game:
-    def __init__(self):
+    def __init__(self, agent: Agent, opponent: Agent):
         self.deck = Deck()
-        self.board = Board()
-        self.player = Player(self.deck)
-        self.opponent = RandomOpponentAgent()
+        self.player = agent
+        self.opponent = opponent
         self._should_quit = False
-        self._state = None
+        self._state: GameState = GameState()
 
-    def run(self, initial_state):
+    def run(self, initial_state: GameState):
         self._should_quit = False
         self._state = initial_state
         # self.display.initialize(initial_state)
@@ -59,8 +63,8 @@ class Game:
 
     def quit(self):
         self._should_quit = True
-        self.agent.stop_running()
-        self.opponent_agent.stop_running()
+        self.player.stop_running()
+        self.opponent.stop_running()
 
     def replenish_cards(self, attacker):
         """
@@ -99,42 +103,31 @@ class Game:
                 min_rank = card.rank
         return starting_attacking_player
 
-    def other_player(self, player):
+    def other_player(self, player: Agent):
         """
-        returns they opponent of given player
+        returns the opponent of given player
         :param player:
         :return:
         """
         if player == self.player:
-            return self.player
-        return self.opponent
+            return self.opponent
+        return self.player
 
     def _game_loop(self):
         attacker = self.first_attacker()
+        self._state.attacker = attacker
+        self._state.defender = self.other_player(attacker)
 
         while not self._state.done and not self._should_quit:
             action = attacker.get_action(self._state)
-
-            # check type of action like this
-            # is there any point in having an "apply action" function?
-            if action == Agent.place_card:
-                pass
-            if action == Agent.take:
-                attacker = self.other_player(attacker)  # this will cause a player to have 2 turns in a row
-
-            action = self.other_player(attacker).get_action(self._state)
-            # now check action again with if's
-
+            if action == Action.STOP:
+                return
+            self._state.apply_action(action)
+            if action == Action.BETA:
+                attacker = self.other_player(attacker)
+                continue
+            opponent_action = self.opponent.get_action(self._state)
+            self._state.apply_opponent_action(opponent_action)
             self.replenish_cards(attacker)
-        # while not self._state.done and not self._should_quit:
-        #     # self.display.mainloop_iteration()
-        #     action = self.agent.get_action(self._state)
-        #     # if action == Action.STOP:
-        #     #     return
-        #     self._state.apply_action(action)
-        #     opponent_action = self.opponent_agent.get_action(self._state)
-        #     self._state.apply_opponent_action(opponent_action)
-        #     # self.display.update_state(self._state, action, opponent_action)
-        #     self._state.update_state()
-        #     self.hand_out_cards()
-        # return self._state.score, self._state.max_tile
+            attacker = self.other_player(attacker)
+        return self._state.winner

@@ -1,19 +1,14 @@
+import argparse
+
+import numpy
+
+import Multi_Agents
 from Game import Game, RandomOpponentAgent
 from GameState import GameState
 
-
 class GameRunner(object):
-    def __init__(self, display=None, agent=None, sleep_between_actions=False):
+    def __init__(self, agent):
         super(GameRunner, self).__init__()
-        # self.sleep_between_actions = sleep_between_actions
-        # self.human_agent = agent is None
-        # if display is None:
-        #     display = GabrieleCirulli2048GraphicsDisplay(self.new_game, self.quit_game, self.human_agent)
-
-        # if agent is None:
-        #     agent = KeyboardAgent(display)
-
-        self.display = display
         self._agent = agent
         self.current_game = None
 
@@ -22,9 +17,7 @@ class GameRunner(object):
         if initial_state is None:
             initial_state = GameState()
         opponent_agent = RandomOpponentAgent()
-        game = Game(self._agent, opponent_agent, self.display, sleep_between_actions=self.sleep_between_actions)
-        for i in range(self.num_of_initial_tiles):
-            initial_state.apply_opponent_action(opponent_agent.get_action(initial_state))
+        game = Game(self._agent, opponent_agent)
         self.current_game = game
         return game.run(initial_state)
 
@@ -33,7 +26,40 @@ class GameRunner(object):
             self.current_game.quit()
 
 
+def create_agent(args):
+    if args.player == "ExpectimaxAgent":
+        agent = Multi_Agents.ExpectimaxAgent()
+    return agent
+
+
+def main():
+    parser = argparse.ArgumentParser(description='Durak game.')
+    parser.add_argument('--random_seed', help='The seed for the random state.', default=numpy.random.randint(100),
+                        type=int)
+    # displays = ['GUI', 'SummaryDisplay']
+    agents = ['ExpectimaxAgent']
+    # parser.add_argument('--display', choices=displays, help='The game ui.', default=displays[0], type=str)
+    parser.add_argument('--agent', choices=agents, help='The agent.', default=agents[0], type=str)
+    parser.add_argument('--depth', help='The maximum depth for to search in the game tree.', default=2, type=int)
+    # parser.add_argument('--sleep_between_actions', help='Should sleep between actions.', default=False, type=bool)
+    parser.add_argument('--num_of_games', help='The number of games to run.', default=1, type=int)
+
+    parser.add_argument('--evaluation_function', help='The evaluation function for ai agent.',
+                        default='score_evaluation_function', type=str)
+    args = parser.parse_args()
+    numpy.random.seed(args.random_seed)
+    initial_state = GameState()
+    # if args.display != displays[0]:
+    #     display = util.lookup('displays.' + args.display, globals())()
+    # else:
+    #     display = None
+    agent = create_agent(args)
+    game_runner = GameRunner(agent)
+    for i in range(args.num_of_games):
+        winner = game_runner.new_game(initial_state)
+
+
+
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    game = Game()
-    game.start()
+    main()
