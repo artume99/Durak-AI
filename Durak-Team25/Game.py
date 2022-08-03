@@ -72,14 +72,14 @@ class Game:
             return
         if attacker == self.player:
             self.player.hand += self.deck.hand_out_cards(
-                6 - len(self.player.hand))
+                max(0, 6 - len(self.player.hand)))
             self.opponent.hand += self.deck.hand_out_cards(
-                6 - len(self.opponent.hand))
+                max(0, 6 - len(self.opponent.hand)))
         else:
             self.opponent.hand += self.deck.hand_out_cards(
-                6 - len(self.opponent.hand))
+                max(0, 6 - len(self.opponent.hand)))
             self.player.hand += self.deck.hand_out_cards(
-                6 - len(self.player.hand))
+                max(0, 6 - len(self.player.hand)))
 
     def first_attacker(self):
         """
