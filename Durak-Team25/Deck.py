@@ -1,4 +1,4 @@
-from random import shuffle
+from random import shuffle, sample
 from Card import Card
 from itertools import product
 
@@ -51,4 +51,6 @@ class Deck:
         :param num:
         :return:
         """
-
+        if num <= len(self.cards_list):
+            return sample(self.cards_list, num)
+        return sample(self.cards_list, len(self.cards_list))
