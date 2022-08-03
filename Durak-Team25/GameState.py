@@ -85,7 +85,7 @@ class GameState:
             self._replenish_cards_for_players()
             self._clear_board()
             self._switch_roles()
-        else:
+        else:  # Place card
             self.card_in_play = action
             self.attacker.hand.remove(action)
             self.cards_on_board.append(CardTup(attack=action, defend=None))
@@ -100,7 +100,7 @@ class GameState:
             self.defender.hand.extend(self.cards_on_board)
             self._replenish_cards(self.attacker)
             self._clear_board()
-        else:
+        else:  # Place card
             self.defender.hand.remove(action)
             self.cards_on_board[-1].defend = action
         self._check_looser()
