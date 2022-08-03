@@ -3,8 +3,10 @@ import argparse
 import numpy
 
 import Multi_Agents
+from Deck import Deck
 from Game import Game, RandomOpponentAgent
 from GameState import GameState
+
 
 class GameRunner(object):
     def __init__(self, agent):
@@ -12,11 +14,13 @@ class GameRunner(object):
         self._agent = agent
         self.current_game = None
 
-    def new_game(self, initial_state=None, *args, **kw):
+    def new_game(self, initial_state, *args, **kw):
         self.quit_game()
-        if initial_state is None:
-            initial_state = GameState()
-        opponent_agent = RandomOpponentAgent()
+        initial_state.reshuffle()
+        op_hand = initial_state.deck.hand_out_cards(6)
+        opponent_agent = RandomOpponentAgent(op_hand)
+        ag_hand = initial_state.deck.hand_out_cards(6)
+        self._agent.hand = ag_hand
         game = Game(self._agent, opponent_agent)
         self.current_game = game
         return game.run(initial_state)
@@ -48,7 +52,8 @@ def main():
                         default='score_evaluation_function', type=str)
     args = parser.parse_args()
     numpy.random.seed(args.random_seed)
-    initial_state = GameState()
+    deck = Deck()
+    initial_state = GameState(deck)
     # if args.display != displays[0]:
     #     display = util.lookup('displays.' + args.display, globals())()
     # else:
@@ -57,7 +62,6 @@ def main():
     game_runner = GameRunner(agent)
     for i in range(args.num_of_games):
         winner = game_runner.new_game(initial_state)
-
 
 
 # Press the green button in the gutter to run the script.

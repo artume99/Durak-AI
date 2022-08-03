@@ -2,9 +2,9 @@
 from .Game import Agent
 
 
-class Algo1(Agent):
-    def __init__(self, deck):
-        super().__init__(deck)
+class ExpectimaxAgent(Agent):
+    def __init__(self, initial_cards=None):
+        super().__init__(initial_cards)
 
     def get_action(self, game_state):
         """
