@@ -11,7 +11,7 @@ class Deck:
         self.suits = ['Spades', 'Hearts', 'Diamonds', 'Clubs']
         self.ranks = list(range(6, 15))  # not supposed to use 2-5 ranked cards
         self.cards_list = []
-        self.uber = None
+        self.kozer = None
         self.top_card = None
         # self.opened_cards = []
         # self.tossed_cards = []  # cards that have been deleted from the game
@@ -27,9 +27,10 @@ class Deck:
     def flip_top_card(self):
         # To be called at the start of the game, before cards are dealt
         self.top_card = self.pop()
-        self.uber = self.top_card.suit
-        for c in self.cards_list:
-            c.uber = self.uber
+        self.kozer = self.top_card.suit
+        for card in self.cards_list:
+            if card.suit == self.kozer:
+                card.kozer = True
         self.cards_list.insert(0, self.top_card)  # should be the last card of the card list
         # self.opened_cards.insert(0, self.top_card)
 
@@ -51,6 +52,8 @@ class Deck:
         :param num:
         :return:
         """
-        if num <= len(self.cards_list):
-            return sample(self.cards_list, num)
-        return sample(self.cards_list, len(self.cards_list))
+        cards_to_hand = []
+        num_of_card_to_hand = min(num,  len(self.cards_list))
+        for i in range(num_of_card_to_hand):
+            cards_to_hand.append(self.pop())
+        return cards_to_hand
