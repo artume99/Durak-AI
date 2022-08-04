@@ -138,20 +138,15 @@ class GameState:
         cards_needed = max(0, 6 - len(player.hand))
         player.hand.extend(self.deck.hand_out_cards(cards_needed))
 
-    def generate_successor(self, agent_index=0, action=Action.STOP):
+    def generate_successor(self, is_attacker: bool, action=Action.STOP):
         """
         generates teh successor state by apllying action
-        :param agent_index:
+        :param is_attacker:
         :param action:
         :return:
         """
-        # successor = GameState(rows=self._num_of_rows, columns=self._num_of_columns, board=self._board.copy(),
-        #                       score=self.score, done=self._done)
-        # if agent_index == 0:
-        #     successor.apply_action(action)
-        # elif agent_index == 1:
-        #     successor.apply_opponent_action(action)
-        # else:
-        #     raise Exception("illegal agent index.")
-        # return successor
-        pass
+        if is_attacker:
+            self.apply_attack_action(action)
+        else:
+            self.apply_defend_action(action)
+        return self
