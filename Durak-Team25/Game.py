@@ -1,5 +1,4 @@
 import abc
-import random
 from enum import Enum
 
 import pygame
@@ -49,8 +48,8 @@ class RandomOpponentAgent(Agent):
 
     def get_action(self, game_state):
         legal_actions = game_state.get_opponent_legal_actions()
-        weights = self._weight_actions(legal_actions)
-        action = random.choices(population=legal_actions, weights=weights, k=1)
+        # weights = self._weight_actions(legal_actions) # can be added as third param in the line below but seems uneeded
+        action = np.random.choice(legal_actions, 1)
         return action
 
     def _weight_actions(self, actions):

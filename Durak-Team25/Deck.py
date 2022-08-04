@@ -1,4 +1,4 @@
-from random import shuffle, sample
+import numpy as np
 from Card import Card
 from itertools import product
 
@@ -35,7 +35,7 @@ class Deck:
         # self.opened_cards.insert(0, self.top_card)
 
     def shuffle(self):
-        shuffle(self.cards_list)
+        np.random.shuffle(x=self.cards_list)
 
     def pop(self):
         return self.cards_list.pop()
