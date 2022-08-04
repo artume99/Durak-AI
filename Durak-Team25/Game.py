@@ -1,5 +1,4 @@
 import abc
-import random
 from enum import Enum
 
 import pygame
@@ -15,9 +14,8 @@ from GameState import GameState
 
 
 class Action(Enum):
-    BETA = 0
+    BETA = 0  # might be multiple cards?
     TAKE = 1
-    STOP = 2
 
 
 class Agent(object):
@@ -49,8 +47,8 @@ class RandomOpponentAgent(Agent):
 
     def get_action(self, game_state):
         legal_actions = game_state.get_opponent_legal_actions()
-        weights = self._weight_actions(legal_actions)
-        action = random.choices(population=legal_actions, weights=weights, k=1)
+        # weights = self._weight_actions(legal_actions) # can be added as third param in the line below but seems uneeded
+        action = np.random.choice(legal_actions, 1)
         return action
 
     def _weight_actions(self, actions):
@@ -121,8 +119,8 @@ class Game:
 
         while not self._state.done and not self._should_quit:
             action = attacker.get_action(self._state)
-            if action == Action.STOP:
-                return
+            # if action == Action.STOP:
+            #     return
             self._state.apply_attack_action(action)
             opponent_action = defender.get_action(self._state)
             self._state.apply_defend_action(opponent_action)
