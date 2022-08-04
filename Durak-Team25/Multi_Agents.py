@@ -2,47 +2,52 @@
 from .Game import Agent
 
 
-# class KeyboardAgent(Agent):
-#     """
-#     An agent controlled by the keyboard.
-#     """
-#     LEFT_KEY = 'a'
-#     RIGHT_KEY = 'd'
-#     UP_KEY = 'w'
-#     DOWN_KEY = 's'
-#
-#     def __init__(self, tk_window):
-#         super().__init__()
-#         self.keys = []
-#         tk_window.subscribe_to_keyboard_pressed(self.listener)
-#         self.tk_window = tk_window
-#         self._should_stop = False
-#
-#     def get_action(self, state):
-#         self._should_stop = False
-#         move = self._get_move(state)
-#         while move is None and not self._should_stop:
-#             self.tk_window.mainloop_iteration()
-#             move = self._get_move(state)
-#         if self._should_stop:
-#             return Action.STOP
-#         return move
-#
-#     def stop_running(self):
-#         self._should_stop = True
-#
-#     def _get_move(self, state):
-#         move = None
-#         legal_actions = state.get_agent_legal_actions()
-#         if Action.LEFT in legal_actions and (self.LEFT_KEY in self.keys or 'Left' in self.keys):  move = Action.LEFT
-#         if Action.RIGHT in legal_actions and (self.RIGHT_KEY in self.keys or 'Right' in self.keys):  move = Action.RIGHT
-#         if Action.UP in legal_actions and (self.UP_KEY in self.keys or 'Up' in self.keys):  move = Action.UP
-#         if Action.DOWN in legal_actions and (self.DOWN_KEY in self.keys or 'Down' in self.keys):  move = Action.DOWN
-#         self.keys = []
-#         return move
-#
-#     def listener(self, tk_event=None, *args, **kw):
-#         self.keys.append(tk_event.keysym)
+class KeyboardAgent(Agent):
+    """
+    An agent controlled by the keyboard.
+    """
+    TAKE = 'a'
+    PLACE_CARD = 'w'
+    SWIPE_RIGHT = 'd'
+
+    def __init__(self):
+        super().__init__()
+
+    def print_card(self, card):
+        """
+        prints something like 3DIAMOND...
+        :param card:
+        :return:
+        """
+        print(str(card.rank) + "" + str(card.suit))
+
+    def get_action(self, state):
+        selected_card_ind = 0
+        print("your hand: ")
+        for i in self.hand:
+            self.print_card(i)
+            print(" ")
+        print("\ncurrently selected card: ")
+        self.print_card(self.hand[selected_card_ind])
+        inp = input("\ntake: a, place_card: w, swipe_right: d\n")
+
+        while inp == "d":
+            selected_card_ind += 1
+            if selected_card_ind >= len(self.hand):
+                selected_card_ind = 0
+            print("currently selected card: ")
+            self.print_card(self.hand[selected_card_ind])
+            inp = input("\ntake: a, place_card: w, swipe_right: d\n")
+
+        if inp == "a":
+            self.hand += state.deck.beta_cards
+            state.deck.beta_cards = []
+        else:  # input == "w"
+            state.deck.beta_cards += self.hand[selected_card_ind]
+            self.hand.remove(self.hand[selected_card_ind])
+
+    def stop_running(self):
+        self._should_stop = True
 
 
 class ExpectimaxAgent(Agent):

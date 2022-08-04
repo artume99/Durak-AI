@@ -14,9 +14,8 @@ from GameState import GameState
 
 
 class Action(Enum):
-    BETA = 0
+    BETA = 0  # might be multiple cards?
     TAKE = 1
-    STOP = 2
 
 
 class Agent(object):
@@ -120,8 +119,8 @@ class Game:
 
         while not self._state.done and not self._should_quit:
             action = attacker.get_action(self._state)
-            if action == Action.STOP:
-                return
+            # if action == Action.STOP:
+            #     return
             self._state.apply_attack_action(action)
             opponent_action = defender.get_action(self._state)
             self._state.apply_defend_action(opponent_action)

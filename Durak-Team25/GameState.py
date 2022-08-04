@@ -138,7 +138,7 @@ class GameState:
         cards_needed = max(0, 6 - len(player.hand))
         player.hand.extend(self.deck.hand_out_cards(cards_needed))
 
-    def generate_successor(self, is_attacker: bool, action=Action.STOP):
+    def generate_successor(self, is_attacker: bool, action):
         """
         generates teh successor state by apllying action
         :param is_attacker:
