@@ -95,7 +95,7 @@ class GameState:
     def apply_attack_action(self, action):
         if action is Action.BETA:
             self._replenish_cards_for_players()
-            self._clear_board()
+            self._clear_board(True)
             self._switch_roles()
         else:  # Place card
             self.card_in_play = action
@@ -106,7 +106,7 @@ class GameState:
     def apply_defend_action(self, action):
         if action is Action.BETA:
             self._replenish_cards_for_players()
-            self._clear_board()
+            self._clear_board(True)
             self._switch_roles()
         elif action is Action.TAKE:
             self.defender.hand.extend(self.cards_on_board)
@@ -120,7 +120,9 @@ class GameState:
     def _switch_roles(self):
         self.attacker, self.defender = self.defender, self.attacker
 
-    def _clear_board(self):
+    def _clear_board(self, move_to_beta: bool = False):
+        if move_to_beta:
+            self.deck.add_to_beta(self.cards_on_board)
         self.card_in_play = None
         self.cards_on_board.clear()
 

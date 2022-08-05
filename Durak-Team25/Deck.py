@@ -21,7 +21,7 @@ class Deck:
         self.build()
 
     def build(self):
-        self.cards_list = []
+        self.cards_list, self.beta_cards = [], []
         for s in self.suits:
             for r in self.ranks:
                 self.cards_list.append(Card(r, s))
@@ -61,3 +61,6 @@ class Deck:
         for i in range(num_of_card_to_hand):
             cards_to_hand.append(self.pop())
         return cards_to_hand
+
+    def add_to_beta(self, cards):
+        self.beta_cards.extend(cards)
