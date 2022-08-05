@@ -31,8 +31,10 @@ class GameRunner(object):
 
 
 def create_agent(args):
-    if args.player == "ExpectimaxAgent":
+    if args.agent == "ExpectimaxAgent":
         agent = Multi_Agents.ExpectimaxAgent()
+    elif args.agent == "KeyboardAgent":
+        agent = Multi_Agents.KeyboardAgent()
     return agent
 
 
@@ -41,7 +43,7 @@ def main():
     parser.add_argument('--random_seed', help='The seed for the random state.', default=numpy.random.randint(100),
                         type=int)
     # displays = ['GUI', 'SummaryDisplay']
-    agents = ['ExpectimaxAgent']
+    agents = ["KeyboardAgent", 'ExpectimaxAgent']
     # parser.add_argument('--display', choices=displays, help='The game ui.', default=displays[0], type=str)
     parser.add_argument('--agent', choices=agents, help='The agent.', default=agents[0], type=str)
     parser.add_argument('--depth', help='The maximum depth for to search in the game tree.', default=2, type=int)

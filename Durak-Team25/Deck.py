@@ -7,12 +7,13 @@ class Deck:
     """
 
     """
+
     def __init__(self):
         # self.suits = ['Spades', 'Hearts', 'Diamonds', 'Clubs']
         self.suits = ['♠', '♥', '♦', '♣']
 
         self.ranks = list(range(6, 15))  # not supposed to use 2-5 ranked cards
-        self.cards_list , self.beta_cards = [], []
+        self.cards_list, self.beta_cards = [], []
         self.kozer = None
         self.top_card = None
         # self.opened_cards = []
@@ -20,6 +21,7 @@ class Deck:
         self.build()
 
     def build(self):
+        self.cards_list = []
         for s in self.suits:
             for r in self.ranks:
                 self.cards_list.append(Card(r, s))
@@ -37,7 +39,7 @@ class Deck:
         # self.opened_cards.insert(0, self.top_card)
 
     def shuffle(self):
-        np.random.shuffle(x=self.cards_list)
+        np.random.shuffle(self.cards_list)
 
     def pop(self):
         return self.cards_list.pop()
@@ -55,7 +57,7 @@ class Deck:
         :return:
         """
         cards_to_hand = []
-        num_of_card_to_hand = min(num,  len(self.cards_list))
+        num_of_card_to_hand = min(num, len(self.cards_list))
         for i in range(num_of_card_to_hand):
             cards_to_hand.append(self.pop())
         return cards_to_hand

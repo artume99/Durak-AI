@@ -1,5 +1,6 @@
 # from .Deck import hand_out_cards
-from .Game import Agent
+from GameState import GameState
+from Game import Agent, Action
 
 
 class KeyboardAgent(Agent):
@@ -13,38 +14,35 @@ class KeyboardAgent(Agent):
     def __init__(self):
         super().__init__()
 
-    def print_card(self, card):
-        """
-        prints something like 3DIAMOND...
-        :param card:
-        :return:
-        """
-        print(str(card.rank) + "" + str(card.suit))
-
-    def get_action(self, state):
+    def get_action(self, state: GameState):
+        print(f'kozer: {state.deck.kozer}, cards on board:{state.cards_on_board}')
+        if state.card_in_play:
+            print("Opponent played: ", end="")
+            print(state.card_in_play)
         selected_card_ind = 0
         print("your hand: ")
-        for i in self.hand:
-            self.print_card(i)
-            print(" ")
-        print("\ncurrently selected card: ")
-        self.print_card(self.hand[selected_card_ind])
-        inp = input("\ntake: a, place_card: w, swipe_right: d\n")
-
+        for card in self.hand:
+            print(f'{card} ', end="")
+        print("\ncurrently selected card: ", end="")
+        print(self.hand[selected_card_ind])
+        actions = state.get_legal_actions(0)
+        print(f'You can play {actions}')
+        inp = input("\ntake: a, place_card: w, swipe_right: d, beta: b\n")
         while inp == "d":
             selected_card_ind += 1
             if selected_card_ind >= len(self.hand):
                 selected_card_ind = 0
-            print("currently selected card: ")
-            self.print_card(self.hand[selected_card_ind])
-            inp = input("\ntake: a, place_card: w, swipe_right: d\n")
+            print("currently selected card: ", end="")
+            print(self.hand[selected_card_ind])
+            inp = input("\ntake: a, place_card: w, swipe_right: d, beta: b\n")
 
         if inp == "a":
-            self.hand += state.deck.beta_cards
-            state.deck.beta_cards = []
-        else:  # input == "w"
-            state.deck.beta_cards += self.hand[selected_card_ind]
-            self.hand.remove(self.hand[selected_card_ind])
+            return Action.TAKE
+        elif inp == "w":
+            return self.hand[selected_card_ind]
+        else:
+            return Action.BETA
+
 
     def stop_running(self):
         self._should_stop = True

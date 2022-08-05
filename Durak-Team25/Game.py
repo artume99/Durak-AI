@@ -6,11 +6,9 @@ import numpy as np
 
 from Card import Card
 from Deck import Deck
-from Board import Board
 from typing import List, Iterable
 from types import FunctionType
 
-from GameState import GameState
 
 
 class Action(Enum):
@@ -41,14 +39,15 @@ class RandomOpponentAgent(Agent):
     The opponent
     """
 
-    def __init__(self, initial_cards=None, passive_action_weight=10):
+    def __init__(self, initial_cards=None, passive_action_weight=10, kozer_weight=10):
         super().__init__(initial_cards)
         self.passive_action_weight = passive_action_weight
+        self.kozer_weight = kozer_weight
 
     def get_action(self, game_state):
         legal_actions = game_state.get_opponent_legal_actions()
         # weights = self._weight_actions(legal_actions) # can be added as third param in the line below but seems uneeded
-        action = np.random.choice(legal_actions, 1)
+        action = np.random.choice(legal_actions, 1)[0]
         return action
 
     def _weight_actions(self, actions):
@@ -58,11 +57,11 @@ class RandomOpponentAgent(Agent):
         for action in actions:
             if action in [Action.BETA, Action.TAKE]:
                 weights.append(self.passive_action_weight)
+            elif action.is_kozer():
+                weights.append(self.kozer_weight)
             else:
                 weights.append(base_weight)
         return weights
-
-
 
 
 class Game:
@@ -70,9 +69,9 @@ class Game:
         self.player = agent
         self.opponent = opponent
         self._should_quit = False
-        self._state: GameState = GameState()
+        self._state = None
 
-    def run(self, initial_state: GameState):
+    def run(self, initial_state):
         self._should_quit = False
         self._state = initial_state
         # self.display.initialize(initial_state)
@@ -88,7 +87,7 @@ class Game:
         who attacks first on the start of the game
         :return:
         """
-        chosen_shape = self._state.deck.top_card.suit
+        chosen_shape = self._state.deck.kozer
         min_rank = 15
         starting_attacking_player = self.player
         for card in self.player.hand:
@@ -118,10 +117,14 @@ class Game:
         self._state.defender = defender
 
         while not self._state.done and not self._should_quit:
-            action = attacker.get_action(self._state)
+            action = self._state.attacker.get_action(self._state)
             # if action == Action.STOP:
             #     return
             self._state.apply_attack_action(action)
-            opponent_action = defender.get_action(self._state)
+            if self._state.done:
+                break
+            if action in [Action.BETA, Action.TAKE]:
+                continue
+            opponent_action = self._state.defender.get_action(self._state)
             self._state.apply_defend_action(opponent_action)
         return self._state.looser
