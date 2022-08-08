@@ -1,5 +1,5 @@
 import numpy as np
-from .Card import Card
+from Card import Card
 from itertools import product
 
 
@@ -9,8 +9,8 @@ class Deck:
     """
 
     def __init__(self):
-        # self.suits = ['Spades', 'Hearts', 'Diamonds', 'Clubs']
-        self.suits = ['♠', '♥', '♦', '♣']
+        self.suits = ['Spades', 'Hearts', 'Diamonds', 'Clubs']
+        # self.suits = ['♠', '♥', '♦', '♣']
 
         self.ranks = list(range(6, 15))  # not supposed to use 2-5 ranked cards
         self.cards_list, self.beta_cards = [], []

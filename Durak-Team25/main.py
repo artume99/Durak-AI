@@ -2,14 +2,23 @@ import argparse
 
 import numpy
 import pygame
-from .Multi_Agents import KeyboardAgent, ExpectimaxAgent
-from .Deck import Deck
-from .Game import Game, RandomOpponentAgent
-from .GameState import GameState
+from Multi_Agents import *
+from Deck import Deck
+from Game import Game, RandomOpponentAgent
+from GameState import GameState
 
 
 class GameRunner(object):
     def __init__(self, agent):
+        # Initialize pygame
+        pygame.init()
+        # Define constants for the screen width and height
+        SCREEN_WIDTH = 800
+        SCREEN_HEIGHT = 600
+        # Create the screen object
+        # The size is determined by the constant SCREEN_WIDTH and SCREEN_HEIGHT
+        self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+
         super(GameRunner, self).__init__()
         self._agent = agent
         self.current_game = None
@@ -54,14 +63,15 @@ def main():
                         default='score_evaluation_function', type=str)
     args = parser.parse_args()
     numpy.random.seed(args.random_seed)
-    deck = Deck()
-    initial_state = GameState(deck)
     # if args.display != displays[0]:
     #     display = util.lookup('displays.' + args.display, globals())()
     # else:
     #     display = None
     agent = create_agent(args)
     game_runner = GameRunner(agent)
+    deck = Deck()
+    initial_state = GameState(deck)
+
     for i in range(args.num_of_games):
         winner = game_runner.new_game(initial_state)
 
