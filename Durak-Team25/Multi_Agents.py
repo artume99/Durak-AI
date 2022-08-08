@@ -1,6 +1,13 @@
-# from .Deck import hand_out_cards
-from GameState import GameState
-from Game import Agent, Action
+from .GameState import GameState
+from .Game import Agent, Action
+from pygame.locals import (
+    K_UP,
+    K_LEFT,
+    K_RIGHT,
+    K_ESCAPE,
+    # KEYDOWN,
+    QUIT,
+)
 
 
 class KeyboardAgent(Agent):

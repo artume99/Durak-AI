@@ -3,9 +3,8 @@ from enum import Enum
 
 import pygame
 import numpy as np
-
-from Card import Card
-from Deck import Deck
+from .Card import Card
+from .Deck import Deck
 from typing import List, Iterable
 from types import FunctionType
 

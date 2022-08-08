@@ -1,11 +1,11 @@
 import argparse
 
 import numpy
-
-import Multi_Agents
-from Deck import Deck
-from Game import Game, RandomOpponentAgent
-from GameState import GameState
+import pygame
+from .Multi_Agents import KeyboardAgent, ExpectimaxAgent
+from .Deck import Deck
+from .Game import Game, RandomOpponentAgent
+from .GameState import GameState
 
 
 class GameRunner(object):
@@ -32,9 +32,9 @@ class GameRunner(object):
 
 def create_agent(args):
     if args.agent == "ExpectimaxAgent":
-        agent = Multi_Agents.ExpectimaxAgent()
+        agent = ExpectimaxAgent()
     elif args.agent == "KeyboardAgent":
-        agent = Multi_Agents.KeyboardAgent()
+        agent = KeyboardAgent()
     return agent
 
 

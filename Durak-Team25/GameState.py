@@ -1,9 +1,9 @@
 from collections import namedtuple
 from typing import List
 
-from Deck import Deck
-from Game import RandomOpponentAgent, Action
-from Game import Agent
+from .Deck import Deck
+from .Game import RandomOpponentAgent, Action
+from .Game import Agent
 
 
 

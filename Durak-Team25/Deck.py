@@ -1,5 +1,5 @@
 import numpy as np
-from Card import Card
+from .Card import Card
 from itertools import product
 
 
