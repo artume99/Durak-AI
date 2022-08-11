@@ -1,3 +1,4 @@
+import math
 from collections import namedtuple
 from typing import List
 
@@ -58,7 +59,7 @@ class GameState:
 
     def draw_players(self, screen):
         for p in self.players:
-            if p == :
+            if type(p) is not RandomOpponentAgent:
                 user_cards_x = SCREENWIDTH // 4
                 user_cards_x_end = SCREENWIDTH - SCREENWIDTH // 4
                 user_cards_gap = (user_cards_x_end - user_cards_x) / len(p)
@@ -70,7 +71,7 @@ class GameState:
                     screen.blit(temp_card,
                                 (user_cards_x + i * user_cards_gap,
                                  SCREENHEIGHT - temp_card_height // 2))
-            elif p.id == 1:
+            else:
                 # Left user
                 user_cards_y = SCREENHEIGHT // 4
                 user_cards_y_end = SCREENHEIGHT - SCREENHEIGHT // 4
@@ -81,21 +82,21 @@ class GameState:
                     temp_card_width = temp_card.get_rect().size[0]
                     screen.blit(temp_card, (-((temp_card_width * 2) // 3),
                                             user_cards_y + i * user_cards_gap))
-            elif p.id == 2:
-                # Right user
-                user_cards_y = SCREENHEIGHT // 4
-                user_cards_y_end = SCREENHEIGHT - SCREENHEIGHT // 4
-                user_cards_gap = (user_cards_y_end - user_cards_y) / len(p)
-                for i, c in enumerate(p.hand):
-                    temp_card = c.current_image
-                    temp_card = pygame.transform.rotate(temp_card, 90)
-                    temp_card_width = temp_card.get_rect().size[0]
-                    screen.blit(temp_card, (SCREENWIDTH - temp_card_width // 3,
-                                            user_cards_y + i * user_cards_gap))
+            # elif p.id == 2:
+            #     # Right user
+            #     user_cards_y = SCREENHEIGHT // 4
+            #     user_cards_y_end = SCREENHEIGHT - SCREENHEIGHT // 4
+            #     user_cards_gap = (user_cards_y_end - user_cards_y) / len(p)
+            #     for i, c in enumerate(p.hand):
+            #         temp_card = c.current_image
+            #         temp_card = pygame.transform.rotate(temp_card, 90)
+            #         temp_card_width = temp_card.get_rect().size[0]
+            #         screen.blit(temp_card, (SCREENWIDTH - temp_card_width // 3,
+            #                                 user_cards_y + i * user_cards_gap))
 
     def draw_deck(self, screen):
         back_c_image = self.deck.cards_list[-1].back_image
-        for i in range(ceil(len(self.deck) / 4.5)):
+        for i in range(math.ceil(len(self.deck) / 4.5)):
             screen.blit(back_c_image,
                         (self.deck_x + i * 2, self.deck_y + i * 2))
 
