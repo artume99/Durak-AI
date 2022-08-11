@@ -109,6 +109,23 @@ class Game:
             return self.opponent
         return self.player
 
+    def render(self):
+        self.screen.blit(self.background, (0, 0))
+        if self.screen_state == GAME_SCREEN:
+            self.game.render(self.screen)
+            # "kill" our menu if we don't need it
+            if self.menu is not None:
+                self.menu = None
+        if self.animate_state == MENU_SCREEN:
+            self.menu.render(self.screen)
+        elif self.animate_state == GAME_SCREEN:
+            # animate menu off screen while screen_state waits
+            if self.screen_state == MENU_SCREEN:
+                self.menu.render(self.screen)
+                self.screen_state = self.menu.animate_off()
+        self.draw_FPS()
+        pygame.display.update()
+
     def _game_loop(self):
         attacker = self.first_attacker()
         defender = self.other_player(attacker)
@@ -126,5 +143,7 @@ class Game:
                 continue
             opponent_action = self._state.defender.get_action(self._state)
             self._state.apply_defend_action(opponent_action)
+
+            self.render(self.screen_state)
             pygame.display.update()
         return self._state.looser
