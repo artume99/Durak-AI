@@ -62,7 +62,7 @@ class GameState:
             if type(p) is not RandomOpponentAgent:
                 user_cards_x = SCREENWIDTH // 4
                 user_cards_x_end = SCREENWIDTH - SCREENWIDTH // 4
-                user_cards_gap = (user_cards_x_end - user_cards_x) / len(p)
+                user_cards_gap = (user_cards_x_end - user_cards_x) / len(p.hand)
                 for i, c in enumerate(p.hand):
                     # temp_card = self.back_card.copy()
                     temp_card = c.current_image
@@ -75,7 +75,7 @@ class GameState:
                 # Left user
                 user_cards_y = SCREENHEIGHT // 4
                 user_cards_y_end = SCREENHEIGHT - SCREENHEIGHT // 4
-                user_cards_gap = (user_cards_y_end - user_cards_y) / len(p)
+                user_cards_gap = (user_cards_y_end - user_cards_y) / len(p.hand)
                 for i, c in enumerate(p.hand):
                     temp_card = c.current_image
                     temp_card = pygame.transform.rotate(temp_card, 90)

@@ -65,12 +65,14 @@ class RandomOpponentAgent(Agent):
 
 class Game:
     def __init__(self, agent: Agent, opponent: Agent):
+        self.screen = None
         self.player = agent
         self.opponent = opponent
         self._should_quit = False
         self._state = None
 
-    def run(self, initial_state):
+    def run(self, initial_state, screen):
+        self.screen = screen
         self._should_quit = False
         self._state = initial_state
         # self.display.initialize(initial_state)
@@ -109,22 +111,10 @@ class Game:
             return self.opponent
         return self.player
 
-    def render(self):
+    def set_background(self):
+        self.background = pygame.surface.Surface((800, 600))
+        self.background.fill((7, 99, 36))
         self.screen.blit(self.background, (0, 0))
-        if self.screen_state == GAME_SCREEN:
-            self.game.render(self.screen)
-            # "kill" our menu if we don't need it
-            if self.menu is not None:
-                self.menu = None
-        if self.animate_state == MENU_SCREEN:
-            self.menu.render(self.screen)
-        elif self.animate_state == GAME_SCREEN:
-            # animate menu off screen while screen_state waits
-            if self.screen_state == MENU_SCREEN:
-                self.menu.render(self.screen)
-                self.screen_state = self.menu.animate_off()
-        self.draw_FPS()
-        pygame.display.update()
 
     def _game_loop(self):
         attacker = self.first_attacker()
@@ -133,6 +123,10 @@ class Game:
         self._state.defender = defender
 
         while not self._state.done and not self._should_quit:
+            self.set_background()
+            self._state.render(self.screen)
+            pygame.display.update()
+
             action = self._state.attacker.get_action(self._state)
             # if action == Action.STOP:
             #     return
@@ -144,6 +138,4 @@ class Game:
             opponent_action = self._state.defender.get_action(self._state)
             self._state.apply_defend_action(opponent_action)
 
-            self.render(self.screen_state)
-            pygame.display.update()
         return self._state.looser
