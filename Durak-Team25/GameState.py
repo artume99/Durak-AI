@@ -27,7 +27,6 @@ class GameState:
         self.deck_x, self.deck_y = (SCREENWIDTH // 2), (SCREENHEIGHT // 2) - (
                 self.back_image.get_rect().size[1] // 2)
         self.show_card_size = False
-        self.players = [self.attacker, self.defender]
 
     @property
     def done(self):
@@ -58,7 +57,8 @@ class GameState:
         #     pygame.draw.rect(screen, (255, 255, 255), temp_rect)
 
     def draw_players(self, screen):
-        for p in self.players:
+        players = [self.attacker, self.defender]
+        for p in players:
             if type(p) is not RandomOpponentAgent:
                 user_cards_x = SCREENWIDTH // 4
                 user_cards_x_end = SCREENWIDTH - SCREENWIDTH // 4
