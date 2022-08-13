@@ -124,6 +124,7 @@ class Game:
 
         while not self._state.done and not self._should_quit:
             self.set_background()
+            print("lol")
             self._state.render(self.screen)
             pygame.display.update()
 

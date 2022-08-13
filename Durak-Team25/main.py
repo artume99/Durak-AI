@@ -30,7 +30,6 @@ class GameRunner(object):
         opponent_agent = RandomOpponentAgent(op_hand)
         ag_hand = initial_state.deck.hand_out_cards(6)
         self._agent.hand = ag_hand
-
         game = Game(self._agent, opponent_agent)
         self.current_game = game
         return game.run(initial_state, self.screen)
