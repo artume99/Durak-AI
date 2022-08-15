@@ -37,24 +37,9 @@ class GameState:
             c.load_image_assets()
 
     def render(self, screen):
-        # if self.animating_init_deck:
-        #     self.animating_init_deck = self.animate_init_deck(screen)
-        #     self.animating_init_deal = not self.animating_init_deck
-        # elif self.animating_init_deal:
-        #     self.draw_deck(screen)
-        #     self.animating_init_deal = self.animate_init_deal(screen)
-        # else:
         self.draw_deck(screen)
         self.draw_players(screen)
         self.deck.render(screen)
-
-        # self.board.render(screen)
-        # DRAW A RECT
-        # if self.show_card_size:
-        #     temp_rect = pygame.rect.Rect(self.mx, self.my,
-        #                                  self.back_image.get_rect().size[0],
-        #                                  self.back_image.get_rect().size[1])
-        #     pygame.draw.rect(screen, (255, 255, 255), temp_rect)
 
     def draw_players(self, screen):
         players = [self.attacker, self.defender]
@@ -64,10 +49,8 @@ class GameState:
                 user_cards_x_end = SCREENWIDTH - SCREENWIDTH // 4
                 user_cards_gap = (user_cards_x_end - user_cards_x) / len(p.hand)
                 for i, c in enumerate(p.hand):
-                    # temp_card = self.back_card.copy()
-                    temp_card = c.current_image
-                    # temp_card = self.deckImages.get(c.suit + str(c.rank))
-                    temp_card_height = temp_card.get_rect().size[1]
+                    temp_card = c.front_image
+                    temp_card_height = temp_card.get_rect().size[1] * 2
                     screen.blit(temp_card,
                                 (user_cards_x + i * user_cards_gap,
                                  SCREENHEIGHT - temp_card_height // 2))
@@ -77,22 +60,11 @@ class GameState:
                 user_cards_y_end = SCREENHEIGHT - SCREENHEIGHT // 4
                 user_cards_gap = (user_cards_y_end - user_cards_y) / len(p.hand)
                 for i, c in enumerate(p.hand):
-                    temp_card = c.current_image
+                    temp_card = c.back_image
                     temp_card = pygame.transform.rotate(temp_card, 90)
-                    temp_card_width = temp_card.get_rect().size[0]
+                    temp_card_width = 0
                     screen.blit(temp_card, (-((temp_card_width * 2) // 3),
                                             user_cards_y + i * user_cards_gap))
-            # elif p.id == 2:
-            #     # Right user
-            #     user_cards_y = SCREENHEIGHT // 4
-            #     user_cards_y_end = SCREENHEIGHT - SCREENHEIGHT // 4
-            #     user_cards_gap = (user_cards_y_end - user_cards_y) / len(p)
-            #     for i, c in enumerate(p.hand):
-            #         temp_card = c.current_image
-            #         temp_card = pygame.transform.rotate(temp_card, 90)
-            #         temp_card_width = temp_card.get_rect().size[0]
-            #         screen.blit(temp_card, (SCREENWIDTH - temp_card_width // 3,
-            #                                 user_cards_y + i * user_cards_gap))
 
     def draw_deck(self, screen):
         back_c_image = self.deck.cards_list[-1].back_image
