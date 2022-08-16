@@ -125,6 +125,7 @@ class Game:
         while not self._state.done and not self._should_quit:
             self.set_background()
             self._state.render(self.screen)
+            # pygame.display.flip()
             pygame.display.update()
 
             action = self._state.attacker.get_action(self._state)

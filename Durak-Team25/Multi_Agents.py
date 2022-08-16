@@ -1,9 +1,12 @@
+import pygame
+
 from GameState import GameState
 from Game import Agent, Action
 from pygame.locals import (
     K_UP,
     K_LEFT,
     K_RIGHT,
+    K_DOWN,
     K_ESCAPE,
     # KEYDOWN,
     QUIT,
@@ -14,9 +17,9 @@ class KeyboardAgent(Agent):
     """
     An agent controlled by the keyboard.
     """
-    TAKE = 'a'
-    PLACE_CARD = 'w'
-    SWIPE_RIGHT = 'd'
+    # TAKE = 'a'
+    # PLACE_CARD = 'w'
+    # SWIPE_RIGHT = 'd'
 
     def __init__(self):
         super().__init__()
@@ -34,18 +37,20 @@ class KeyboardAgent(Agent):
         print(self.hand[selected_card_ind])
         actions = state.get_legal_actions(0)
         print(f'You can play {actions}')
-        inp = input("\ntake: a, place_card: w, swipe_right: d, beta: b\n")
-        while inp == "d":
+        print("\ntake: up, place_card: left, swipe_right: right, beta: down\n")
+        inp = pygame.key.get_pressed()
+        while inp[K_RIGHT]:
             selected_card_ind += 1
             if selected_card_ind >= len(self.hand):
                 selected_card_ind = 0
             print("currently selected card: ", end="")
             print(self.hand[selected_card_ind])
-            inp = input("\ntake: a, place_card: w, swipe_right: d, beta: b\n")
+            print("\ntake: up, place_card: left, swipe_right: right, beta: down\n")
+            inp = pygame.key.get_pressed()
 
-        if inp == "a":
+        if inp[K_LEFT]:
             return Action.TAKE
-        elif inp == "w":
+        elif inp[K_UP]:
             return self.hand[selected_card_ind]
         else:
             return Action.BETA

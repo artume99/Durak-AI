@@ -67,15 +67,22 @@ class GameState:
                                             user_cards_y + i * user_cards_gap))
 
     def draw_deck(self, screen):
+        # main (unused) deck
         back_c_image = self.deck.cards_list[-1].back_image
         for i in range(math.ceil(len(self.deck) / 4.5)):
             screen.blit(back_c_image,
                         (self.deck_x + i * 2, self.deck_y + i * 2))
 
+        # kozer
         top_card_image = self.deck.top_card.front_image
         screen.blit(top_card_image, (
         self.deck_x - top_card_image.get_rect().size[0], self.deck_y))
 
+        # deck in play
+        # for i in range(math.ceil(len(self.cards_on_board) / 4.5)):
+        #     # print(self.cards_on_board[i])
+        #     screen.blit(self.cards_on_board[i].front_image,
+        #                 (self.deck_x + i * 2, self.deck_y + 1 + i * 2))
         return True
 
     def reshuffle(self):
@@ -155,8 +162,7 @@ class GameState:
             self._switch_roles()
         else:  # Place card
             self.card_in_play = action
-            self.attacker.hand.remove(action)
-            self.cards_on_board.append(action)
+            self.place_card(self.attacker, action)
         self._check_looser()
 
     def apply_defend_action(self, action):
@@ -169,9 +175,12 @@ class GameState:
             self._replenish_cards(self.attacker)
             self._clear_board()
         else:  # Place card
-            self.defender.hand.remove(action)
-            self.cards_on_board.append(action)
+            self.place_card(self.defender, action)
         self._check_looser()
+
+    def place_card(self, player, card):
+        player.hand.remove(card)
+        self.cards_on_board.append(card)
 
     def _switch_roles(self):
         self.attacker, self.defender = self.defender, self.attacker
