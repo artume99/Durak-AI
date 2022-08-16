@@ -8,7 +8,7 @@ from pygame.locals import (
     K_RIGHT,
     K_DOWN,
     K_ESCAPE,
-    # KEYDOWN,
+    KEYDOWN,
     QUIT,
 )
 
@@ -38,22 +38,35 @@ class KeyboardAgent(Agent):
         actions = state.get_legal_actions(0)
         print(f'You can play {actions}')
         print("\ntake: up, place_card: left, swipe_right: right, beta: down\n")
-        inp = pygame.key.get_pressed()
-        while inp[K_RIGHT]:
-            selected_card_ind += 1
-            if selected_card_ind >= len(self.hand):
-                selected_card_ind = 0
-            print("currently selected card: ", end="")
-            print(self.hand[selected_card_ind])
-            print("\ntake: up, place_card: left, swipe_right: right, beta: down\n")
-            inp = pygame.key.get_pressed()
 
-        if inp[K_LEFT]:
-            return Action.TAKE
-        elif inp[K_UP]:
-            return self.hand[selected_card_ind]
-        else:
-            return Action.BETA
+        pygame.event.clear()
+        while True:
+            event = pygame.event.wait()
+            # if event.type == QUIT:
+            #     pygame.quit()
+            #     sys.exit()
+            if event.type == KEYDOWN:
+                if event.key == K_LEFT:
+                   return Action.BETA
+        # inp = pygame.key.get_pressed()
+        # while True:
+        #     while inp[K_RIGHT]:
+        #         selected_card_ind += 1
+        #         if selected_card_ind >= len(self.hand):
+        #             selected_card_ind = 0
+        #         print("currently selected card: ", end="")
+        #         print(self.hand[selected_card_ind])
+        #         print("\ntake: up, place_card: left, swipe_right: right, beta: down\n")
+        #         inp = pygame.key.get_pressed()
+        #     if inp[K_LEFT] or inp[K_UP]:
+        #         break
+
+        # if inp[K_LEFT]:
+        #     return Action.TAKE
+        # elif inp[K_UP]:
+        #     return self.hand[selected_card_ind]
+        # else:
+        #     return Action.BETA
 
 
     def stop_running(self):
