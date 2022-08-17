@@ -51,9 +51,12 @@ class GameState:
                 for i, c in enumerate(p.hand):
                     temp_card = c.front_image
                     temp_card_height = temp_card.get_rect().size[1] * 2
+                    if i == p.selected_card_ind:
+                        temp_card_height += 15
                     screen.blit(temp_card,
                                 (user_cards_x + i * user_cards_gap,
                                  SCREENHEIGHT - temp_card_height // 2))
+
             else:
                 # Left user
                 user_cards_y = SCREENHEIGHT // 4
@@ -80,9 +83,9 @@ class GameState:
 
         # deck in play
         for i in range(math.ceil(len(self.cards_on_board) / 4.5)):
-            # print(self.cards_on_board[i])
             screen.blit(self.cards_on_board[i].front_image,
-                        (self.deck_x + i * 2, self.deck_y + 1 + i * 2))
+                        (self.deck_x + 10 + top_card_image.get_rect().size[0] + i * 2,
+                         self.deck_y + i * 2))
         return True
 
     def reshuffle(self):

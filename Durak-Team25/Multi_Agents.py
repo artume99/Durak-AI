@@ -29,12 +29,11 @@ class KeyboardAgent(Agent):
         if state.card_in_play:
             print("Opponent played: ", end="")
             print(state.card_in_play)
-        selected_card_ind = 0
         print("your hand: ")
         for card in self.hand:
             print(f'{card} ', end="")
         print("\ncurrently selected card: ", end="")
-        print(self.hand[selected_card_ind])
+        print(self.hand[self.selected_card_ind])
         actions = state.get_legal_actions(0)
         print(f'You can play {actions}')
         print("\ntake: up, place_card: left, swipe_right: right, beta: down\n")
@@ -49,15 +48,16 @@ class KeyboardAgent(Agent):
                 if event.key == K_LEFT:
                     return Action.TAKE
                 elif event.key == K_UP:
-                    return self.hand[selected_card_ind]
+                    return self.hand[self.selected_card_ind]
                 elif event.key == K_DOWN:
                     return Action.BETA
                 elif event.key == K_RIGHT:
-                    selected_card_ind += 1
-                    if selected_card_ind >= len(self.hand):
-                        selected_card_ind = 0
+                    self.selected_card_ind += 1
+                    if self.selected_card_ind >= len(self.hand):
+                        self.selected_card_ind = 0
+                        # state.draw_players(state.screen)
                     print("currently selected card: ", end="")
-                    print(self.hand[selected_card_ind])
+                    print(self.hand[self.selected_card_ind])
                     print("\ntake: up, place_card: left, swipe_right: right, beta: down\n")
 
         # inp = pygame.key.get_pressed()
@@ -79,7 +79,6 @@ class KeyboardAgent(Agent):
         #     return self.hand[selected_card_ind]
         # else:
         #     return Action.BETA
-
 
     def stop_running(self):
         self._should_stop = True

@@ -9,17 +9,16 @@ from typing import List, Iterable
 from types import FunctionType
 
 
-
 class Action(Enum):
     BETA = 0  # might be multiple cards?
     TAKE = 1
-    SWIPE = 2
 
 
 class Agent(object):
     def __init__(self, initial_cards: List = None):
         super(Agent, self).__init__()
         self.hand = initial_cards
+        self.selected_card_ind = 0
 
     @abc.abstractmethod
     def get_action(self, game_state) -> FunctionType:
@@ -76,7 +75,6 @@ class Game:
         self.screen = screen
         self._should_quit = False
         self._state = initial_state
-        # self.display.initialize(initial_state)
         return self._game_loop()
 
     def quit(self):
