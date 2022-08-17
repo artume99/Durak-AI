@@ -1,10 +1,14 @@
+import math
 from collections import namedtuple
 from typing import List
+
+import pygame
 
 from Deck import Deck
 from Game import RandomOpponentAgent, Action
 from Game import Agent
-
+SCREENWIDTH = 800
+SCREENHEIGHT = 600
 
 class GameState:
     def __init__(self, deck: Deck = None, done=False, attacker=None, defender=None, card_in_play=None,
@@ -18,9 +22,73 @@ class GameState:
         self.card_in_play = card_in_play
         self.cards_on_board = cards_on_board if cards_on_board else []
 
+        self.load_image_assets()
+        self.back_image = self.deck.cards_list[-1].current_image.copy()
+        self.deck_x, self.deck_y = (SCREENWIDTH // 2), (SCREENHEIGHT // 2) - (
+                self.back_image.get_rect().size[1] // 2)
+        self.show_card_size = False
+
     @property
     def done(self):
         return self._done
+
+    def load_image_assets(self):
+        for c in self.deck.cards_list:
+            c.load_image_assets()
+
+    def render(self, screen):
+        self.draw_deck(screen)
+        self.draw_players(screen)
+        self.deck.render(screen)
+
+    def draw_players(self, screen):
+        players = [self.attacker, self.defender]
+        for p in players:
+            if type(p) is not RandomOpponentAgent:
+                user_cards_x = SCREENWIDTH // 4
+                user_cards_x_end = SCREENWIDTH - SCREENWIDTH // 4
+                user_cards_gap = (user_cards_x_end - user_cards_x) / len(p.hand)
+                for i, c in enumerate(p.hand):
+                    temp_card = c.front_image
+                    temp_card_height = temp_card.get_rect().size[1] * 2
+                    if i == p.selected_card_ind:
+                        temp_card_height += 15
+                    screen.blit(temp_card,
+                                (user_cards_x + i * user_cards_gap,
+                                 SCREENHEIGHT - temp_card_height // 2))
+
+            else:
+                # Left user
+                user_cards_y = SCREENHEIGHT // 4
+                user_cards_y_end = SCREENHEIGHT - SCREENHEIGHT // 4
+                user_cards_gap = (user_cards_y_end - user_cards_y) / len(p.hand)
+                for i, c in enumerate(p.hand):
+                    temp_card = c.back_image
+                    temp_card = pygame.transform.rotate(temp_card, 90)
+                    temp_card_width = 0
+                    screen.blit(temp_card, (-((temp_card_width * 2) // 3),
+                                            user_cards_y + i * user_cards_gap))
+
+    def draw_deck(self, screen):
+        # main (unused) deck
+        back_c_image = self.deck.cards_list[-1].back_image
+        for i in range(math.ceil(len(self.deck) / 4.5)):
+            screen.blit(back_c_image,
+                        (self.deck_x + i * 2, self.deck_y + i * 2))
+
+        # kozer
+        top_card_image = self.deck.top_card.front_image
+        screen.blit(top_card_image, (
+        self.deck_x - top_card_image.get_rect().size[0], self.deck_y))
+
+        # deck in play
+        offset = 0
+        for i in range(len(self.cards_on_board)):
+            offset += 15
+            screen.blit(self.cards_on_board[i].front_image,
+                        (self.deck_x + 10 + top_card_image.get_rect().size[0] + offset*(i//2 + 1),
+                         self.deck_y + offset*(i//2 + 1)))
+        return True
 
     def reshuffle(self):
         self.deck.build()
@@ -99,8 +167,7 @@ class GameState:
             self._switch_roles()
         else:  # Place card
             self.card_in_play = action
-            self.attacker.hand.remove(action)
-            self.cards_on_board.append(action)
+            self.place_card(self.attacker, action)
         self._check_looser()
 
     def apply_defend_action(self, action):
@@ -113,9 +180,12 @@ class GameState:
             self._replenish_cards(self.attacker)
             self._clear_board()
         else:  # Place card
-            self.defender.hand.remove(action)
-            self.cards_on_board.append(action)
+            self.place_card(self.defender, action)
         self._check_looser()
+
+    def place_card(self, player, card):
+        player.hand.remove(card)
+        self.cards_on_board.append(card)
 
     def _switch_roles(self):
         self.attacker, self.defender = self.defender, self.attacker

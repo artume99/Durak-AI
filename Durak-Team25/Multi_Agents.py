@@ -1,15 +1,27 @@
-# from .Deck import hand_out_cards
+import pygame
+
 from GameState import GameState
 from Game import Agent, Action
+from pygame.locals import (
+    K_UP,
+    K_LEFT,
+    K_RIGHT,
+    K_DOWN,
+    K_ESCAPE,
+    KEYDOWN,
+    QUIT,
+    K_SPACE
+)
 
 
 class KeyboardAgent(Agent):
     """
     An agent controlled by the keyboard.
     """
-    TAKE = 'a'
-    PLACE_CARD = 'w'
-    SWIPE_RIGHT = 'd'
+
+    # TAKE = 'a'
+    # PLACE_CARD = 'w'
+    # SWIPE_RIGHT = 'd'
 
     def __init__(self):
         super().__init__()
@@ -19,30 +31,61 @@ class KeyboardAgent(Agent):
         if state.card_in_play:
             print("Opponent played: ", end="")
             print(state.card_in_play)
-        selected_card_ind = 0
         print("your hand: ")
         for card in self.hand:
             print(f'{card} ', end="")
         print("\ncurrently selected card: ", end="")
-        print(self.hand[selected_card_ind])
+        print(self.hand[self.selected_card_ind])
         actions = state.get_legal_actions(0)
         print(f'You can play {actions}')
-        inp = input("\ntake: a, place_card: w, swipe_right: d, beta: b\n")
-        while inp == "d":
-            selected_card_ind += 1
-            if selected_card_ind >= len(self.hand):
-                selected_card_ind = 0
-            print("currently selected card: ", end="")
-            print(self.hand[selected_card_ind])
-            inp = input("\ntake: a, place_card: w, swipe_right: d, beta: b\n")
+        print("\ntake: left, place_card: space, swipe_right: right, beta: down\n")
 
-        if inp == "a":
-            return Action.TAKE
-        elif inp == "w":
-            return self.hand[selected_card_ind]
-        else:
-            return Action.BETA
+        pygame.event.clear()
+        while True:
+            event = pygame.event.wait()
+            # if event.type == QUIT:
+            #     pygame.quit()
+            #     sys.exit()
+            if event.type == KEYDOWN:
+                if event.key == K_LEFT:
+                    self.selected_card_ind = 0
+                    return Action.TAKE
+                elif event.key == K_SPACE:
+                    card = self.hand[self.selected_card_ind]
+                    self.selected_card_ind = 0
+                    return card
+                elif event.key == K_DOWN:
+                    self.selected_card_ind = 0
+                    return Action.BETA
+                elif event.key == K_RIGHT:
+                    self.selected_card_ind += 1
+                    if self.selected_card_ind >= len(self.hand):
+                        self.selected_card_ind = 0
+                        # state.draw_players(state.screen)
+                    print("currently selected card: ", end="")
+                    print(self.hand[self.selected_card_ind])
+                    print("\ntake: left, place_card: space, swipe_right: right, beta: down\n")
+                    return Action.SWIPE
 
+        # inp = pygame.key.get_pressed()
+        # while True:
+        #     while inp[K_RIGHT]:
+        #         selected_card_ind += 1
+        #         if selected_card_ind >= len(self.hand):
+        #             selected_card_ind = 0
+        #         print("currently selected card: ", end="")
+        #         print(self.hand[selected_card_ind])
+        #         print("\ntake: up, place_card: left, swipe_right: right, beta: down\n")
+        #         inp = pygame.key.get_pressed()
+        #     if inp[K_LEFT] or inp[K_UP]:
+        #         break
+
+        # if inp[K_LEFT]:
+        #     return Action.TAKE
+        # elif inp[K_UP]:
+        #     return self.hand[selected_card_ind]
+        # else:
+        #     return Action.BETA
 
     def stop_running(self):
         self._should_stop = True
