@@ -13,6 +13,7 @@ from types import FunctionType
 class Action(Enum):
     BETA = 0  # might be multiple cards?
     TAKE = 1
+    SWIPE = 2
 
 
 class Agent(object):
@@ -125,7 +126,7 @@ class Game:
         while not self._state.done and not self._should_quit:
             self.set_background()
             self._state.render(self.screen)
-            # pygame.display.flip()
+            pygame.display.flip()
             pygame.display.update()
 
             action = self._state.attacker.get_action(self._state)
