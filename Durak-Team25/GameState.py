@@ -82,10 +82,12 @@ class GameState:
         self.deck_x - top_card_image.get_rect().size[0], self.deck_y))
 
         # deck in play
-        for i in range(math.ceil(len(self.cards_on_board) / 4.5)):
+        offset = 0
+        for i in range(len(self.cards_on_board)):
+            offset += 15
             screen.blit(self.cards_on_board[i].front_image,
-                        (self.deck_x + 10 + top_card_image.get_rect().size[0] + i * 2,
-                         self.deck_y + i * 2))
+                        (self.deck_x + 10 + top_card_image.get_rect().size[0] + offset*(i//2 + 1),
+                         self.deck_y + offset*(i//2 + 1)))
         return True
 
     def reshuffle(self):

@@ -12,6 +12,7 @@ from types import FunctionType
 class Action(Enum):
     BETA = 0  # might be multiple cards?
     TAKE = 1
+    SWIPE = 2
 
 
 class Agent(object):
@@ -45,7 +46,8 @@ class RandomOpponentAgent(Agent):
 
     def get_action(self, game_state):
         legal_actions = game_state.get_opponent_legal_actions()
-        # weights = self._weight_actions(legal_actions) # can be added as third param in the line below but seems uneeded
+        # weights = np.array(self._weight_actions(
+        #     legal_actions)) / 100  # can be added as third param in the line below but seems uneeded
         action = np.random.choice(legal_actions, 1)[0]
         return action
 
@@ -128,14 +130,32 @@ class Game:
             pygame.display.update()
 
             action = self._state.attacker.get_action(self._state)
+            self.render()
             # if action == Action.STOP:
             #     return
+            while action is Action.SWIPE:
+                action = self._state.attacker.get_action(self._state)
+                self.render()
+
             self._state.apply_attack_action(action)
             if self._state.done:
                 break
             if action in [Action.BETA, Action.TAKE]:
                 continue
+            self.render()
+
             opponent_action = self._state.defender.get_action(self._state)
+            self.render()
+            while opponent_action is Action.SWIPE:
+                opponent_action = self._state.defender.get_action(self._state)
+                self.render()
+
             self._state.apply_defend_action(opponent_action)
 
         return self._state.looser
+
+    def render(self):
+        self.set_background()
+        self._state.render(self.screen)
+        pygame.display.flip()
+        pygame.display.update()
