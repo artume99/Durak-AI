@@ -10,17 +10,17 @@ from Game import Agent
 SCREENWIDTH = 800
 SCREENHEIGHT = 600
 
-
 class GameState:
-    def __init__(self, deck: Deck = None, done=False):
+    def __init__(self, deck: Deck = None, done=False, attacker=None, defender=None, card_in_play=None,
+                 cards_on_board=None):
         super(GameState, self).__init__()
-        self.attacker = Agent()
-        self.defender = Agent()
+        self.attacker = attacker  # can remove the defender state as it will always be the opposition of the attacker
+        self.defender = defender
         self.deck = deck
         self.looser = None
         self._done = done
-        self.card_in_play = None
-        self.cards_on_board = []
+        self.card_in_play = card_in_play
+        self.cards_on_board = cards_on_board if cards_on_board else []
 
         self.load_image_assets()
         self.back_image = self.deck.cards_list[-1].current_image.copy()
