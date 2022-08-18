@@ -13,11 +13,11 @@ class GameRunner(object):
         # Initialize pygame
         pygame.init()
         # Define constants for the screen width and height
-        SCREEN_WIDTH = 800
-        SCREEN_HEIGHT = 600
+        self.SCREEN_WIDTH = 1200
+        self.SCREEN_HEIGHT = 600
         # Create the screen object
         # The size is determined by the constant SCREEN_WIDTH and SCREEN_HEIGHT
-        self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+        self.screen = pygame.display.set_mode((self.SCREEN_WIDTH, self.SCREEN_HEIGHT))
 
         super(GameRunner, self).__init__()
         self._agent = agent
@@ -27,10 +27,12 @@ class GameRunner(object):
         self.quit_game()
         initial_state.reshuffle()
         op_hand = initial_state.deck.hand_out_cards(6)
+        op_hand.sort()
         opponent_agent = RandomOpponentAgent(op_hand)
         ag_hand = initial_state.deck.hand_out_cards(6)
+        ag_hand.sort()
         self._agent.hand = ag_hand
-        game = Game(self._agent, opponent_agent)
+        game = Game(self._agent, opponent_agent, self.SCREEN_WIDTH, self.SCREEN_HEIGHT)
         self.current_game = game
         return game.run(initial_state, self.screen)
 

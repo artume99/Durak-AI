@@ -8,6 +8,8 @@ from Deck import Deck
 from typing import List, Iterable
 from types import FunctionType
 
+GREEN = (7, 99, 36)
+
 
 class Action(Enum):
     BETA = 0  # might be multiple cards?
@@ -66,12 +68,13 @@ class RandomOpponentAgent(Agent):
 
 
 class Game:
-    def __init__(self, agent: Agent, opponent: Agent):
+    def __init__(self, agent: Agent, opponent: Agent, screen_width, screen_height):
         self.screen = None
         self.player = agent
         self.opponent = opponent
         self._should_quit = False
         self._state = None
+        self.resolution = (screen_width, screen_height)
 
     def run(self, initial_state, screen):
         self.screen = screen
@@ -113,8 +116,8 @@ class Game:
         return self.player
 
     def set_background(self):
-        self.background = pygame.surface.Surface((800, 600))
-        self.background.fill((7, 99, 36))
+        self.background = pygame.surface.Surface(self.resolution)
+        self.background.fill(GREEN)
         self.screen.blit(self.background, (0, 0))
 
     def _game_loop(self):

@@ -32,3 +32,21 @@ class Card(pygame.sprite.Sprite):
 
     def __repr__(self):
         return str(self.rank) + "" + str(self.suit)
+
+    def __gt__(self, other):
+        if self.is_kozer() and not other.is_kozer():
+            return False
+        elif not self.is_kozer() and other.is_kozer():
+            return True
+        t1 = self.suit, self.rank
+        t2 = other.suit, other.rank
+        return t1 < t2
+
+    def __lt__(self, other):
+        if self.is_kozer() and not other.is_kozer():
+            return True
+        elif not self.is_kozer() and other.is_kozer():
+            return False
+        t1 = self.suit, self.rank
+        t2 = other.suit, other.rank
+        return t1 > t2
