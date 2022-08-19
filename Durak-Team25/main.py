@@ -10,12 +10,13 @@ from Constants import *
 
 
 class GameRunner(object):
-    def __init__(self, agent):
+    def __init__(self, agent, sleep_between_actions):
         # Initialize pygame
         pygame.init()
         # Create the screen object
         # The size is determined by the constant SCREEN_WIDTH and SCREEN_HEIGHT
         self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+        self.sleep_between_actions = sleep_between_actions
 
         super(GameRunner, self).__init__()
         self._agent = agent
@@ -29,7 +30,7 @@ class GameRunner(object):
         opponent_agent = RandomOpponentAgent(op_hand)
         ag_hand = initial_state.deck.hand_out_cards(6)
         self._agent.hand = ag_hand
-        game = Game(self._agent, opponent_agent)
+        game = Game(self._agent, opponent_agent, sleep_between_actions=self.sleep_between_actions)
         self.current_game = game
         return game.run(initial_state, self.screen)
 
@@ -55,7 +56,7 @@ def main():
     # parser.add_argument('--display', choices=displays, help='The game ui.', default=displays[0], type=str)
     parser.add_argument('--agent', choices=agents, help='The agent.', default=agents[0], type=str)
     parser.add_argument('--depth', help='The maximum depth for to search in the game tree.', default=2, type=int)
-    # parser.add_argument('--sleep_between_actions', help='Should sleep between actions.', default=False, type=bool)
+    parser.add_argument('--sleep_between_actions', help='Should sleep between actions.', default=False, type=bool)
     parser.add_argument('--num_of_games', help='The number of games to run.', default=3, type=int)
 
     parser.add_argument('--evaluation_function', help='The evaluation function for ai agent.',
@@ -67,7 +68,7 @@ def main():
     # else:
     #     display = None
     agent = create_agent(args)
-    game_runner = GameRunner(agent)
+    game_runner = GameRunner(agent, sleep_between_actions=args.sleep_between_actions)
     deck = Deck()
     initial_state = GameState(deck)
 

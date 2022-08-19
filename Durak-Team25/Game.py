@@ -1,4 +1,5 @@
 import abc
+import time
 from enum import Enum
 from Constants import *
 
@@ -73,12 +74,13 @@ class RandomOpponentAgent(Agent):
 
 
 class Game:
-    def __init__(self, agent: Agent, opponent: Agent):
+    def __init__(self, agent: Agent, opponent: Agent, sleep_between_actions):
         self.screen = None
         self.player = agent
         self.opponent = opponent
         self._should_quit = False
         self._state = None
+        self.sleep_between_actions = sleep_between_actions
 
     def run(self, initial_state, screen):
         self.screen = screen
@@ -145,6 +147,8 @@ class Game:
                 self.render()
 
             self._state.apply_attack_action(action)
+            if self.sleep_between_actions:
+                time.sleep(1)
             if self._state.done:
                 break
             if action in [Action.BETA, Action.TAKE]:
@@ -158,6 +162,8 @@ class Game:
                 self.render()
 
             self._state.apply_defend_action(opponent_action)
+            if self.sleep_between_actions:
+                time.sleep(1)
 
         return self._state.looser
 

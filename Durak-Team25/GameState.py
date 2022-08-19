@@ -1,3 +1,4 @@
+import copy
 import math
 from collections import namedtuple
 from typing import List
@@ -99,6 +100,22 @@ class GameState:
             return self.get_opponent_legal_actions()
         else:
             raise Exception("illegal agent index.")
+
+    def apply_agent_actions(self, action):
+        """
+        Checks the type of the player (attack, defend) and returns it's actions
+        :return:
+        """
+        if type(self.attacker) is RandomOpponentAgent:
+            return self.apply_defend_action(action)
+        else:
+            return self.apply_attack_action(action)
+
+    def apply_opponent_action(self, action):
+        if type(self.attacker) is RandomOpponentAgent:
+            self.apply_attack_action(action)
+        else:
+            return self.apply_defend_action(action)
 
     def get_opponent_legal_actions(self):
         """
@@ -229,15 +246,18 @@ class GameState:
         cards_needed = max(0, 6 - len(player.hand))
         player.extend_hand(self.deck.hand_out_cards(cards_needed))
 
-    def generate_successor(self, is_attacker: bool, action):
+    def generate_successor(self, agent_index, action):
         """
-        generates teh successor state by apllying action
-        :param is_attacker:
+        generates the successor state by apllying action
+        :param agent_index:
         :param action:
         :return:
         """
-        if is_attacker:
-            self.apply_attack_action(action)
+        successor = copy.deepcopy(GameState)()
+        if agent_index == 0:
+            successor.apply_agent_actions(action)
+        elif agent_index == 1:
+            successor.apply_opponent_action(action)
         else:
-            self.apply_defend_action(action)
-        return self
+            raise Exception("illegal agent index.")
+        return successor
