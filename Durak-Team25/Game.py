@@ -56,9 +56,9 @@ class RandomOpponentAgent(Agent):
 
     def get_action(self, game_state):
         legal_actions = game_state.get_opponent_legal_actions()
-        # weights = np.array(self._weight_actions(
-        #     legal_actions)) / 100  # can be added as third param in the line below but seems uneeded
-        action = np.random.choice(legal_actions, 1)[0]
+        weights = np.array(self._weight_actions(
+            legal_actions)) / 100  # can be added as third param in the line below but seems uneeded
+        action = np.random.choice(legal_actions, 1, p=weights/np.sum(weights))[0]
         return action
 
     def _weight_actions(self, actions):
