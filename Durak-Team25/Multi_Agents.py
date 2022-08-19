@@ -19,9 +19,11 @@ class KeyboardAgent(Agent):
     An agent controlled by the keyboard.
     """
 
-    # TAKE = 'a'
-    # PLACE_CARD = 'w'
-    # SWIPE_RIGHT = 'd'
+    # TAKE = 'down'
+    # PLACE_CARD = 'space'
+    # SWIPE_RIGHT = 'right'
+    # SWIPE_LEFT = 'left'
+    # BETA = 'up'
 
     def __init__(self):
         super().__init__()
@@ -38,7 +40,7 @@ class KeyboardAgent(Agent):
         print(self.hand[self.selected_card_ind])
         actions = state.get_legal_actions(0)
         print(f'You can play {actions}')
-        print("\ntake: left, place_card: space, swipe_right: right, beta: down\n")
+        print("\ntake: down, place_card: space, swipe_right: right, swipe_left: left beta: up\n")
 
         pygame.event.clear()
         while True:
@@ -47,14 +49,14 @@ class KeyboardAgent(Agent):
             #     pygame.quit()
             #     sys.exit()
             if event.type == KEYDOWN:
-                if event.key == K_LEFT:
-                    self.selected_card_ind = 0
-                    return Action.TAKE
-                elif event.key == K_SPACE:
+                if event.key == K_SPACE:
                     card = self.hand[self.selected_card_ind]
                     self.selected_card_ind = 0
                     return card
                 elif event.key == K_DOWN:
+                    self.selected_card_ind = 0
+                    return Action.TAKE
+                elif event.key == K_UP:
                     self.selected_card_ind = 0
                     return Action.BETA
                 elif event.key == K_RIGHT:
@@ -64,7 +66,15 @@ class KeyboardAgent(Agent):
                         # state.draw_players(state.screen)
                     print("currently selected card: ", end="")
                     print(self.hand[self.selected_card_ind])
-                    print("\ntake: left, place_card: space, swipe_right: right, beta: down\n")
+                    print("\ntake: down, place_card: space, swipe_right: right, swipe_left: left beta: up\n")
+                    return Action.SWIPE
+                elif event.key == K_LEFT:
+                    self.selected_card_ind -= 1
+                    if self.selected_card_ind < 0:
+                        self.selected_card_ind = len(self.hand) - 1
+                        print("currently selected card: ", end="")
+                        print(self.hand[self.selected_card_ind])
+                        print("\ntake: down, place_card: space, swipe_right: right, swipe_left: left beta: up\n")
                     return Action.SWIPE
 
         # inp = pygame.key.get_pressed()
@@ -79,7 +89,7 @@ class KeyboardAgent(Agent):
         #         inp = pygame.key.get_pressed()
         #     if inp[K_LEFT] or inp[K_UP]:
         #         break
-
+        #
         # if inp[K_LEFT]:
         #     return Action.TAKE
         # elif inp[K_UP]:

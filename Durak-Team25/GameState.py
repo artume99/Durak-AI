@@ -1,6 +1,7 @@
 import math
 from collections import namedtuple
 from typing import List
+from itertools import product
 
 import pygame
 
@@ -27,6 +28,7 @@ class GameState:
         self.deck_x, self.deck_y = (SCREENWIDTH // 2), (SCREENHEIGHT // 2) - (
                 self.back_image.get_rect().size[1] // 2)
         self.show_card_size = False
+        self.cards_locations = list(product([80, 280], [650, 850, 1050]))
 
     @property
     def done(self):
@@ -81,13 +83,13 @@ class GameState:
         screen.blit(top_card_image, (
         self.deck_x - top_card_image.get_rect().size[0], self.deck_y))
 
-        # deck in play
-        offset = 0
         for i in range(len(self.cards_on_board)):
-            offset += 15
-            screen.blit(self.cards_on_board[i].front_image,
-                        (self.deck_x + 10 + top_card_image.get_rect().size[0] + offset*(i//2 + 1),
-                         self.deck_y + offset*(i//2 + 1)))
+            if i % 2 == 1:
+                offset = 25
+            else:
+                offset = 0
+            loc = self.cards_locations[i // 2]
+            screen.blit(self.cards_on_board[i].front_image, (loc[1] + offset, loc[0] + offset))
         return True
 
     def reshuffle(self):
@@ -222,6 +224,7 @@ class GameState:
     def _replenish_cards(self, player: Agent):
         cards_needed = max(0, 6 - len(player.hand))
         player.hand.extend(self.deck.hand_out_cards(cards_needed))
+        player.hand.sort()
 
     def generate_successor(self, is_attacker: bool, action):
         """
