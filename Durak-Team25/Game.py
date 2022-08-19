@@ -1,4 +1,5 @@
 import abc
+import copy
 import time
 from enum import Enum
 from Constants import *
@@ -17,6 +18,7 @@ class Action(Enum):
     BETA = 0  # might be multiple cards?
     TAKE = 1
     SWIPE = 2
+    STOP = 3
 
 
 class Agent(object):
@@ -71,6 +73,14 @@ class RandomOpponentAgent(Agent):
             else:
                 weights.append(base_weight)
         return weights
+
+    def copy(self):
+        new_agent = RandomOpponentAgent()
+        new_hand = []
+        for card in self.hand:
+            new_hand.append(card.copy())
+        new_agent.hand = new_hand
+        return new_agent
 
 
 class Game:

@@ -10,6 +10,7 @@ from Game import RandomOpponentAgent, Action
 from Game import Agent
 from Constants import *
 
+
 class GameState:
     def __init__(self, deck: Deck = None, done=False, attacker=None, defender=None, card_in_play=None,
                  cards_on_board=None):
@@ -23,9 +24,10 @@ class GameState:
         self.cards_on_board = cards_on_board if cards_on_board else []
 
         self.load_image_assets()
-        self.back_image = self.deck.cards_list[-1].current_image.copy()
+        self.back_image = self.deck.back_image.copy()
         self.deck_x, self.deck_y = (SCREEN_WIDTH // 3), (SCREEN_HEIGHT // 2) - (
-                self.back_image.get_rect().size[1] // 2) #todo: why does this line happen 2 times? once here and once in Deck.py?
+                self.back_image.get_rect().size[
+                    1] // 2)  # todo: why does this line happen 2 times? once here and once in Deck.py?
         self.show_card_size = False
 
     @property
@@ -47,7 +49,7 @@ class GameState:
             if type(p) is not RandomOpponentAgent:
                 user_cards_x = SCREEN_WIDTH // 4
                 user_cards_x_end = SCREEN_WIDTH - SCREEN_WIDTH // 4
-                user_cards_gap = (user_cards_x_end - user_cards_x) / (len(p.hand)+1)
+                user_cards_gap = (user_cards_x_end - user_cards_x) / (len(p.hand) + 1)
                 for i, c in enumerate(p.hand):
                     temp_card = c.front_image
                     temp_card_height = temp_card.get_rect().size[1] * 2
@@ -61,7 +63,7 @@ class GameState:
                 # Left user
                 user_cards_y = SCREEN_HEIGHT // 4
                 user_cards_y_end = SCREEN_HEIGHT - SCREEN_HEIGHT // 4
-                user_cards_gap = (user_cards_y_end - user_cards_y) / (len(p.hand)+1)
+                user_cards_gap = (user_cards_y_end - user_cards_y) / (len(p.hand) + 1)
                 for i, c in enumerate(p.hand):
                     temp_card = c.back_image
                     temp_card = pygame.transform.rotate(temp_card, 90)
@@ -79,7 +81,7 @@ class GameState:
         # kozer
         top_card_image = self.deck.top_card.front_image
         screen.blit(top_card_image, (
-        self.deck_x - top_card_image.get_rect().size[0], self.deck_y))
+            self.deck_x - top_card_image.get_rect().size[0], self.deck_y))
 
         for i in range(len(self.cards_on_board)):
             if i % 2 == 1:
@@ -253,7 +255,14 @@ class GameState:
         :param action:
         :return:
         """
-        successor = copy.deepcopy(GameState)()
+        new_deck = self.deck.copy()
+        attacker = self.attacker.copy()
+        defender = self.defender.copy()
+        # attacker = copy.copy(self.attacker)
+        # defender = copy.copy(self.defender)
+        successor = GameState(deck=new_deck, done=self._done, attacker=attacker,
+                              defender=defender, card_in_play=copy.copy(self.card_in_play),
+                              cards_on_board=copy.copy(self.cards_on_board))
         if agent_index == 0:
             successor.apply_agent_actions(action)
         elif agent_index == 1:

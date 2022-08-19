@@ -3,7 +3,7 @@ from pygame.locals import RLEACCEL
 
 
 class Card(pygame.sprite.Sprite):
-    def __init__(self, rank, suit):
+    def __init__(self, rank, suit, load=True):
         self.rank = rank
         self.suit = suit
         self.kozer = False
@@ -13,7 +13,8 @@ class Card(pygame.sprite.Sprite):
         # self.surf = pygame.Surface((75, 25))
         # self.surf.set_colorkey((255, 255, 255), RLEACCEL)
         # self.rect = self.surf.get_rect()
-        self.load_image_assets()
+        if load:
+            self.load_image_assets()
 
     def load_image_assets(self):
         self.back_image = pygame.image.load('Cards/BackCard.png').convert_alpha()
@@ -50,3 +51,16 @@ class Card(pygame.sprite.Sprite):
         t1 = self.suit, self.rank
         t2 = other.suit, other.rank
         return t1 > t2
+
+    def __eq__(self, other):
+        if type(other) is Card:
+            return self.suit == other.suit and self.rank == other.rank
+        return super.__eq__(Card, other)
+
+    def copy(self):
+        new_card = Card(self.rank, self.suit, load=False)
+        new_card.kozer = self.kozer
+        new_card.back_image = self.back_image.copy()
+        new_card.front_image = self.front_image.copy()
+        new_card.current_image = self.current_image.copy()
+        return new_card

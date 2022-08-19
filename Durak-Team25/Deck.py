@@ -4,35 +4,41 @@ import pygame
 from Constants import *
 from Card import Card
 
+suits = ['Spades', 'Hearts', 'Diamonds', 'Clubs']
+ranks = list(range(6, 15))  # not supposed to use 2-5 ranked cards
+
 
 class Deck:
     """
 
     """
 
-    def __init__(self):
-        self.suits = ['Spades', 'Hearts', 'Diamonds', 'Clubs']
+    def __init__(self, card_list=None, beta_card=None, kozer=None, top_card=None, build=True):
         # self.suits = ['♠', '♥', '♦', '♣']
-
-        self.ranks = list(range(6, 15))  # not supposed to use 2-5 ranked cards
-        self.cards_list, self.beta_cards = [], []
-        self.kozer = None
-        self.top_card = None
         # self.opened_cards = []
         # self.tossed_cards = []  # cards that have been deleted from the game
-        self.build()
+        if beta_card is None:
+            beta_card = []
+        if card_list is None:
+            card_list = []
+        self.cards_list, self.beta_cards = card_list, beta_card
+        self.kozer = kozer
+        self.top_card = top_card
+        if build:
+            self.build()
 
         self.attack_list, self.defense_list = [], []
-        self.back_image = self.cards_list[-1].current_image.copy()  # PROBLEM I THINK
+        self.back_image = self.top_card.current_image.copy()  # PROBLEM I THINK
         self.deck_x, self.deck_y = (SCREEN_WIDTH // 3), (SCREEN_HEIGHT // 2) - (
-                    self.back_image.get_rect().size[1] // 2) #todo: why does this line happen 2 times? once here and once in GameState.py?
+                self.back_image.get_rect().size[
+                    1] // 2)  # todo: why does this line happen 2 times? once here and once in GameState.py?
         self.card_pos = {0: []}
         self.found_size = False
 
     def build(self):
         self.cards_list, self.beta_cards = [], []
-        for s in self.suits:
-            for r in self.ranks:
+        for s in suits:
+            for r in ranks:
                 self.cards_list.append(Card(r, s))
         self.shuffle()
         self.flip_top_card()
@@ -79,12 +85,12 @@ class Deck:
         card_gap = 110
 
         left_row_x = (self.deck_x - card_width) - (
-                    (SCREEN_WIDTH - card_width // 2) - (
-                        self.deck_y + card_width) - card_width) // 2
+                (SCREEN_WIDTH - card_width // 2) - (
+                self.deck_y + card_width) - card_width) // 2
         for c_index in range(1, card_count_y + 1):
             # (c_index through cardD_count_y // 2)
             cx_index = c_index % (card_count_y // 2) if c_index % (
-                        card_count_y // 2) != 0 else card_count_y // 2
+                    card_count_y // 2) != 0 else card_count_y // 2
             cy_index = (c_index - cx_index) // (card_count_y // 2)
             print(c_index, cx_index, cy_index)
             if cx_index == 1:
@@ -101,10 +107,10 @@ class Deck:
                         temp_y = left_row_y
                     elif i % 2 == 0:
                         temp_y = left_row_y - ((card_width + card_gap // 2) * (
-                                    i - i // 2))
+                                i - i // 2))
                     else:
                         temp_y = left_row_y + ((card_width + card_gap // 2) * (
-                                    i - i // 2))
+                                i - i // 2))
                     temp_pos = (left_row_x * (cy_index + 1), temp_y, 90)
                     position_list.append(temp_pos)
                 self.card_pos.update({c_index: position_list})
@@ -116,10 +122,10 @@ class Deck:
                         temp_y = left_row_y
                     elif i % 2 == 0:
                         temp_y = left_row_y - ((card_width + card_gap // 2) * (
-                                    i - i // 2))
+                                i - i // 2))
                     else:
                         temp_y = left_row_y + ((card_width + card_gap // 2) * (
-                                    i - i // 2))
+                                i - i // 2))
                     temp_pos = (left_row_x * (cy_index + 1), temp_y, 90)
                     position_list.append(temp_pos)
                 self.card_pos.update({c_index: position_list})
@@ -137,9 +143,9 @@ class Deck:
         card_count_y = 1
         while not self.found_size:
             found_x_card_count = build_size_width + card_gap + card_width >= SCREEN_WIDTH - (
-                        2 * card_height // 3)
+                    2 * card_height // 3)
             found_y_card_count = build_size_width + card_gap + card_width >= SCREEN_HEIGHT - (
-                        5 * card_height // 6)
+                    5 * card_height // 6)
             if found_x_card_count and found_y_card_count:
                 self.found_size = True
                 print("SCREEN_WIDTH", SCREEN_WIDTH - (2 * card_height // 3))
@@ -169,3 +175,12 @@ class Deck:
 
         # temp_rect = pygame.rect.Rect()
         # draw all played cards in the correct place lol
+
+    def copy(self):
+        new_card_list = []
+        new_beta_list = []
+        for card in self.cards_list:
+            new_card_list.append(card.copy())
+        new_deck = Deck(card_list=new_card_list, beta_card=new_beta_list, kozer=self.kozer,
+                        top_card=self.top_card.copy(), build=False)
+        return new_deck

@@ -1,3 +1,7 @@
+import copy
+from enum import Enum
+from typing import Tuple
+
 import pygame
 
 from GameState import GameState
@@ -13,6 +17,12 @@ from pygame.locals import (
     K_SPACE
 )
 from Constants import *
+
+
+class AgentNum(Enum):
+    Player = 0
+    Computer = 1
+
 
 class KeyboardAgent(Agent):
     """
@@ -103,7 +113,21 @@ class KeyboardAgent(Agent):
         self._should_stop = True
 
 
-class ExpectimaxAgent(Agent):
+def base_evaluation(game_state):
+    return 5
+
+
+class MultiAgentSearchAgent(Agent):
+    def __init__(self, evaluation_function=base_evaluation, depth=2):
+        super().__init__()
+        self.evaluation_function = evaluation_function
+        self.depth = depth
+
+    def get_action(self, game_state: GameState):
+        return
+
+
+class ExpectimaxAgent(MultiAgentSearchAgent):
     def __init__(self, initial_cards=None):
         super().__init__(initial_cards)
 
@@ -114,3 +138,65 @@ class ExpectimaxAgent(Agent):
         :return:
         """
         pass
+
+
+class MinmaxAgent(MultiAgentSearchAgent):
+    def get_action(self, game_state: GameState):
+        """
+        Returns the minimax action from the current gameState using self.depth
+        and self.evaluationFunction.
+
+        Here are some method calls that might be useful when implementing minimax.
+
+        game_state.get_legal_actions(agent_index):
+            Returns a list of legal actions for an agent
+            agent_index=0 means our agent, the opponent is agent_index=1
+
+        Action.STOP:
+            The stop direction, which is always legal
+
+        game_state.generate_successor(agent_index, action):
+            Returns the successor game state after an agent takes an action
+        """
+        """*** YOUR CODE HERE ***"""
+        minimax = self.minimax(game_state, self.depth, AgentNum.Player)
+        return minimax[1]
+
+    def minimax(self, game_state: GameState, depth: int, agent: AgentNum) -> Tuple[int, Action]:
+        # region if 𝑑𝑒𝑝𝑡ℎ = 0 or v is a terminal node then return 𝑢(𝑣)
+        if depth == 0:
+            return self.evaluation_function(game_state), Action.STOP
+        # endregion
+
+        costume_key = lambda x: x[0]
+
+        # region  if isMaxNode then return max
+        if agent == AgentNum.Player:
+            legal_moves = game_state.get_legal_actions(agent.value)
+            max_val = (float("-inf"), Action.STOP)
+            for move in legal_moves:
+                new_state = game_state.generate_successor(agent.value, move)
+                response_val = self.minimax(new_state, depth - 1, AgentNum.Computer)[0], move
+                max_val = max(max_val, response_val, key=costume_key)
+            return max_val
+
+        # endregion
+
+        # region  if isMinNode then return min
+        if agent == AgentNum.Computer:
+            legal_moves = game_state.get_legal_actions(agent.value)
+            min_val = (float("inf"), Action.STOP)
+            for move in legal_moves:
+                new_state = game_state.generate_successor(agent.value, move)
+                response_val = self.minimax(new_state, depth, AgentNum.Player)[0], move
+                min_val = min(min_val, response_val, key=costume_key)
+            return min_val
+        # endregion
+
+    def copy(self):
+        new_agent = MinmaxAgent()
+        new_hand = []
+        for card in self.hand:
+            new_hand.append(card.copy())
+        new_agent.hand = new_hand
+        return new_agent
