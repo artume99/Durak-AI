@@ -37,7 +37,8 @@ class KeyboardAgent(Agent):
         for card in self.hand:
             print(f'{card} ', end="")
         print("\ncurrently selected card: ", end="")
-        print(self.hand[self.selected_card_ind])
+        if len(self.hand) > 0:
+            print(self.hand[self.selected_card_ind])
         actions = state.get_legal_actions(0)
         print(f'You can play {actions}')
         print(state.deck)

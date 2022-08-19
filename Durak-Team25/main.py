@@ -23,11 +23,12 @@ class GameRunner(object):
 
     def new_game(self, initial_state, *args, **kw):
         self.quit_game()
+        initial_state.finish_game()
         initial_state.reshuffle()
         op_hand = initial_state.deck.hand_out_cards(6)
         opponent_agent = RandomOpponentAgent(op_hand)
         ag_hand = initial_state.deck.hand_out_cards(6)
-        self._agent.extend_hand(ag_hand)
+        self._agent.hand = ag_hand
         game = Game(self._agent, opponent_agent)
         self.current_game = game
         return game.run(initial_state, self.screen)
@@ -55,7 +56,7 @@ def main():
     parser.add_argument('--agent', choices=agents, help='The agent.', default=agents[0], type=str)
     parser.add_argument('--depth', help='The maximum depth for to search in the game tree.', default=2, type=int)
     # parser.add_argument('--sleep_between_actions', help='Should sleep between actions.', default=False, type=bool)
-    parser.add_argument('--num_of_games', help='The number of games to run.', default=1, type=int)
+    parser.add_argument('--num_of_games', help='The number of games to run.', default=3, type=int)
 
     parser.add_argument('--evaluation_function', help='The evaluation function for ai agent.',
                         default='score_evaluation_function', type=str)

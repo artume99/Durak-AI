@@ -46,7 +46,7 @@ class GameState:
             if type(p) is not RandomOpponentAgent:
                 user_cards_x = SCREEN_WIDTH // 4
                 user_cards_x_end = SCREEN_WIDTH - SCREEN_WIDTH // 4
-                user_cards_gap = (user_cards_x_end - user_cards_x) / len(p.hand)
+                user_cards_gap = (user_cards_x_end - user_cards_x) / (len(p.hand)+1)
                 for i, c in enumerate(p.hand):
                     temp_card = c.front_image
                     temp_card_height = temp_card.get_rect().size[1] * 2
@@ -60,7 +60,7 @@ class GameState:
                 # Left user
                 user_cards_y = SCREEN_HEIGHT // 4
                 user_cards_y_end = SCREEN_HEIGHT - SCREEN_HEIGHT // 4
-                user_cards_gap = (user_cards_y_end - user_cards_y) / len(p.hand)
+                user_cards_gap = (user_cards_y_end - user_cards_y) / (len(p.hand)+1)
                 for i, c in enumerate(p.hand):
                     temp_card = c.back_image
                     temp_card = pygame.transform.rotate(temp_card, 90)
@@ -200,12 +200,19 @@ class GameState:
         Checks if there is a looser, null if there is no looser
         :return:
         """
+        if len(self.deck) > 0:
+            return
         if len(self.attacker.hand) == 0:
             self.looser = self.defender
             self._done = True
         elif len(self.defender.hand) == 0:
             self.looser = self.attacker
             self._done = True
+
+    def finish_game(self):
+        self._done = False
+        self.cards_on_board = []
+        self.card_in_play = None
 
     def _replenish_cards_for_players(self):
         """
