@@ -12,7 +12,7 @@ from pygame.locals import (
     QUIT,
     K_SPACE
 )
-
+from Constants import *
 
 class KeyboardAgent(Agent):
     """
@@ -40,7 +40,7 @@ class KeyboardAgent(Agent):
         print(self.hand[self.selected_card_ind])
         actions = state.get_legal_actions(0)
         print(f'You can play {actions}')
-        print("\ntake: down, place_card: space, swipe_right: right, swipe_left: left beta: up\n")
+        print(MSG_FOR_KEYBOARD_AGENT)
 
         pygame.event.clear()
         while True:
@@ -66,7 +66,7 @@ class KeyboardAgent(Agent):
                         # state.draw_players(state.screen)
                     print("currently selected card: ", end="")
                     print(self.hand[self.selected_card_ind])
-                    print("\ntake: down, place_card: space, swipe_right: right, swipe_left: left beta: up\n")
+                    print(MSG_FOR_KEYBOARD_AGENT)
                     return Action.SWIPE
                 elif event.key == K_LEFT:
                     self.selected_card_ind -= 1
@@ -74,7 +74,7 @@ class KeyboardAgent(Agent):
                         self.selected_card_ind = len(self.hand) - 1
                         print("currently selected card: ", end="")
                         print(self.hand[self.selected_card_ind])
-                        print("\ntake: down, place_card: space, swipe_right: right, swipe_left: left beta: up\n")
+                        print(MSG_FOR_KEYBOARD_AGENT)
                     return Action.SWIPE
 
         # inp = pygame.key.get_pressed()

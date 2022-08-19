@@ -1,10 +1,8 @@
 import numpy as np
 import pygame
 
+from Constants import *
 from Card import Card
-from itertools import product
-SCREENWIDTH = 800
-SCREENHEIGHT = 600
 
 
 class Deck:
@@ -26,8 +24,8 @@ class Deck:
 
         self.attack_list, self.defense_list = [], []
         self.back_image = self.cards_list[-1].current_image.copy()  # PROBLEM I THINK
-        self.deck_x, self.deck_y = (SCREENWIDTH // 2), (SCREENHEIGHT // 2) - (
-                    self.back_image.get_rect().size[1] // 2)
+        self.deck_x, self.deck_y = (SCREEN_WIDTH // 3), (SCREEN_HEIGHT // 2) - (
+                    self.back_image.get_rect().size[1] // 2) #todo: why does this line happen 2 times? once here and once in GameState.py?
         self.card_pos = {0: []}
         self.found_size = False
 
@@ -81,7 +79,7 @@ class Deck:
         card_gap = 110
 
         left_row_x = (self.deck_x - card_width) - (
-                    (SCREENWIDTH - card_width // 2) - (
+                    (SCREEN_WIDTH - card_width // 2) - (
                         self.deck_y + card_width) - card_width) // 2
         for c_index in range(1, card_count_y + 1):
             # (c_index through cardD_count_y // 2)
@@ -90,13 +88,13 @@ class Deck:
             cy_index = (c_index - cx_index) // (card_count_y // 2)
             print(c_index, cx_index, cy_index)
             if cx_index == 1:
-                left_row_y = SCREENHEIGHT // 2 - card_width // 2
+                left_row_y = SCREEN_HEIGHT // 2 - card_width // 2
                 temp_pos = (left_row_x * (cy_index + 1), left_row_y, 90)
                 position_list = self.card_pos.get(c_index - 1).copy()
                 position_list.append(temp_pos)
                 self.card_pos.update({c_index: position_list})
             elif cx_index % 2 == 0:
-                left_row_y = SCREENHEIGHT // 2 - card_width - card_gap // 4
+                left_row_y = SCREEN_HEIGHT // 2 - card_width - card_gap // 4
                 position_list = self.card_pos.get(c_index - 2).copy()
                 for i in range(len(position_list), c_index):
                     if i == 0:
@@ -111,7 +109,7 @@ class Deck:
                     position_list.append(temp_pos)
                 self.card_pos.update({c_index: position_list})
             elif cx_index % 2 == 1:
-                left_row_y = SCREENHEIGHT // 2 - card_width // 2
+                left_row_y = SCREEN_HEIGHT // 2 - card_width // 2
                 position_list = self.card_pos.get(c_index - 2).copy()
                 for i in range(len(position_list), c_index):
                     if i == 0:
@@ -138,13 +136,13 @@ class Deck:
         card_count_x = 1
         card_count_y = 1
         while not self.found_size:
-            found_x_card_count = build_size_width + card_gap + card_width >= SCREENWIDTH - (
+            found_x_card_count = build_size_width + card_gap + card_width >= SCREEN_WIDTH - (
                         2 * card_height // 3)
-            found_y_card_count = build_size_width + card_gap + card_width >= SCREENHEIGHT - (
+            found_y_card_count = build_size_width + card_gap + card_width >= SCREEN_HEIGHT - (
                         5 * card_height // 6)
             if found_x_card_count and found_y_card_count:
                 self.found_size = True
-                print("SCREENWIDTH", SCREENWIDTH - (2 * card_height // 3))
+                print("SCREEN_WIDTH", SCREEN_WIDTH - (2 * card_height // 3))
                 print("build_size_width", build_size_width)
                 print(card_count_x, "cards can be played horizontally")
                 print(card_width + card_gap)
