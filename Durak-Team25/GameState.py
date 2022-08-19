@@ -1,15 +1,13 @@
 import math
 from collections import namedtuple
 from typing import List
-from itertools import product
 
 import pygame
 
 from Deck import Deck
 from Game import RandomOpponentAgent, Action
 from Game import Agent
-SCREENWIDTH = 800
-SCREENHEIGHT = 600
+from Constants import *
 
 class GameState:
     def __init__(self, deck: Deck = None, done=False, attacker=None, defender=None, card_in_play=None,
@@ -25,10 +23,9 @@ class GameState:
 
         self.load_image_assets()
         self.back_image = self.deck.cards_list[-1].current_image.copy()
-        self.deck_x, self.deck_y = (SCREENWIDTH // 2), (SCREENHEIGHT // 2) - (
-                self.back_image.get_rect().size[1] // 2)
+        self.deck_x, self.deck_y = (SCREEN_WIDTH // 3), (SCREEN_HEIGHT // 2) - (
+                self.back_image.get_rect().size[1] // 2) #todo: why does this line happen 2 times? once here and once in Deck.py?
         self.show_card_size = False
-        self.cards_locations = list(product([80, 280], [650, 850, 1050]))
 
     @property
     def done(self):
@@ -47,8 +44,8 @@ class GameState:
         players = [self.attacker, self.defender]
         for p in players:
             if type(p) is not RandomOpponentAgent:
-                user_cards_x = SCREENWIDTH // 4
-                user_cards_x_end = SCREENWIDTH - SCREENWIDTH // 4
+                user_cards_x = SCREEN_WIDTH // 4
+                user_cards_x_end = SCREEN_WIDTH - SCREEN_WIDTH // 4
                 user_cards_gap = (user_cards_x_end - user_cards_x) / len(p.hand)
                 for i, c in enumerate(p.hand):
                     temp_card = c.front_image
@@ -57,12 +54,12 @@ class GameState:
                         temp_card_height += 15
                     screen.blit(temp_card,
                                 (user_cards_x + i * user_cards_gap,
-                                 SCREENHEIGHT - temp_card_height // 2))
+                                 SCREEN_HEIGHT - temp_card_height // 2))
 
             else:
                 # Left user
-                user_cards_y = SCREENHEIGHT // 4
-                user_cards_y_end = SCREENHEIGHT - SCREENHEIGHT // 4
+                user_cards_y = SCREEN_HEIGHT // 4
+                user_cards_y_end = SCREEN_HEIGHT - SCREEN_HEIGHT // 4
                 user_cards_gap = (user_cards_y_end - user_cards_y) / len(p.hand)
                 for i, c in enumerate(p.hand):
                     temp_card = c.back_image
@@ -88,7 +85,7 @@ class GameState:
                 offset = 25
             else:
                 offset = 0
-            loc = self.cards_locations[i // 2]
+            loc = CARDS_ON_BOARD_LOCS[i // 2]
             screen.blit(self.cards_on_board[i].front_image, (loc[1] + offset, loc[0] + offset))
         return True
 
@@ -178,7 +175,7 @@ class GameState:
             self._clear_board(True)
             self._switch_roles()
         elif action is Action.TAKE:
-            self.defender.hand.extend(self.cards_on_board)
+            self.defender.extend_hand(self.cards_on_board)
             self._replenish_cards(self.attacker)
             self._clear_board()
         else:  # Place card
@@ -223,8 +220,7 @@ class GameState:
 
     def _replenish_cards(self, player: Agent):
         cards_needed = max(0, 6 - len(player.hand))
-        player.hand.extend(self.deck.hand_out_cards(cards_needed))
-        player.hand.sort()
+        player.extend_hand(self.deck.hand_out_cards(cards_needed))
 
     def generate_successor(self, is_attacker: bool, action):
         """

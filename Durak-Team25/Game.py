@@ -1,5 +1,6 @@
 import abc
 from enum import Enum
+from Constants import *
 
 import pygame
 import numpy as np
@@ -8,7 +9,7 @@ from Deck import Deck
 from typing import List, Iterable
 from types import FunctionType
 
-GREEN = (7, 99, 36)
+
 
 
 class Action(Enum):
@@ -18,7 +19,7 @@ class Action(Enum):
 
 
 class Agent(object):
-    def __init__(self, initial_cards: List = None):
+    def __init__(self, initial_cards: List = []):
         super(Agent, self).__init__()
         self.hand = initial_cards
         self.selected_card_ind = 0
@@ -31,6 +32,10 @@ class Agent(object):
         :return:
         """
         return
+
+    def extend_hand(self, cards):
+        self.hand.extend(cards)
+        self.hand.sort()
 
     def stop_running(self):
         pass
@@ -68,13 +73,12 @@ class RandomOpponentAgent(Agent):
 
 
 class Game:
-    def __init__(self, agent: Agent, opponent: Agent, screen_width, screen_height):
+    def __init__(self, agent: Agent, opponent: Agent):
         self.screen = None
         self.player = agent
         self.opponent = opponent
         self._should_quit = False
         self._state = None
-        self.resolution = (screen_width, screen_height)
 
     def run(self, initial_state, screen):
         self.screen = screen
@@ -116,7 +120,7 @@ class Game:
         return self.player
 
     def set_background(self):
-        self.background = pygame.surface.Surface(self.resolution)
+        self.background = pygame.surface.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
         self.background.fill(GREEN)
         self.screen.blit(self.background, (0, 0))
 

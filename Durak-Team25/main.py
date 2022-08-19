@@ -6,18 +6,16 @@ from Multi_Agents import *
 from Deck import Deck
 from Game import Game, RandomOpponentAgent
 from GameState import GameState
+from Constants import *
 
 
 class GameRunner(object):
     def __init__(self, agent):
         # Initialize pygame
         pygame.init()
-        # Define constants for the screen width and height
-        self.SCREEN_WIDTH = 1200
-        self.SCREEN_HEIGHT = 600
         # Create the screen object
         # The size is determined by the constant SCREEN_WIDTH and SCREEN_HEIGHT
-        self.screen = pygame.display.set_mode((self.SCREEN_WIDTH, self.SCREEN_HEIGHT))
+        self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 
         super(GameRunner, self).__init__()
         self._agent = agent
@@ -27,12 +25,10 @@ class GameRunner(object):
         self.quit_game()
         initial_state.reshuffle()
         op_hand = initial_state.deck.hand_out_cards(6)
-        op_hand.sort()
         opponent_agent = RandomOpponentAgent(op_hand)
         ag_hand = initial_state.deck.hand_out_cards(6)
-        ag_hand.sort()
-        self._agent.hand = ag_hand
-        game = Game(self._agent, opponent_agent, self.SCREEN_WIDTH, self.SCREEN_HEIGHT)
+        self._agent.extend_hand(ag_hand)
+        game = Game(self._agent, opponent_agent)
         self.current_game = game
         return game.run(initial_state, self.screen)
 
