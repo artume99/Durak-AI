@@ -40,6 +40,7 @@ class KeyboardAgent(Agent):
         print(self.hand[self.selected_card_ind])
         actions = state.get_legal_actions(0)
         print(f'You can play {actions}')
+        print(state.deck)
         print(MSG_FOR_KEYBOARD_AGENT)
 
         pygame.event.clear()

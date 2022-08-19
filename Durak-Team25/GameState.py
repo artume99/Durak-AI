@@ -70,7 +70,7 @@ class GameState:
 
     def draw_deck(self, screen):
         # main (unused) deck
-        back_c_image = self.deck.cards_list[-1].back_image
+        back_c_image = self.deck.top_card.back_image
         for i in range(math.ceil(len(self.deck) / 4.5)):
             screen.blit(back_c_image,
                         (self.deck_x + i * 2, self.deck_y + i * 2))
