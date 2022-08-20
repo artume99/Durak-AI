@@ -113,7 +113,11 @@ class KeyboardAgent(Agent):
         self._should_stop = True
 
 
-def base_evaluation(game_state, hand, op_hand):
+def base_evaluation(game_state):
+    if game_state.is_attacking(0):
+        hand, op_hand = game_state.attacker.hand, game_state.defender.hand
+    else:
+        op_hand, hand = game_state.attacker.hand, game_state.defender.hand
     return len(op_hand) - len(hand)
 
 
@@ -148,11 +152,7 @@ class MinmaxAgent(MultiAgentSearchAgent):
     def minimax(self, game_state: GameState, depth: int, agent: AgentNum) -> Tuple[int, Action]:
         # region if 𝑑𝑒𝑝𝑡ℎ = 0 or v is a terminal node then return 𝑢(𝑣)
         if depth == 0 or game_state.done:
-            if game_state.is_attacking(0):
-                hand, op_hand = game_state.attacker.hand, game_state.defender.hand
-            else:
-                op_hand, hand = game_state.attacker.hand, game_state.defender.hand
-            return self.evaluation_function(game_state, hand, op_hand), Action.STOP
+            return self.evaluation_function(game_state), Action.STOP
         # endregion
 
         costume_key = lambda x: x[0]

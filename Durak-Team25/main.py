@@ -65,10 +65,7 @@ def main():
                         default='score_evaluation_function', type=str)
     args = parser.parse_args()
     numpy.random.seed(args.random_seed)
-    # if args.display != displays[0]:
-    #     display = util.lookup('displays.' + args.display, globals())()
-    # else:
-    #     display = None
+
     agent = create_agent(args)
     game_runner = GameRunner(agent, sleep_between_actions=args.sleep_between_actions)
     deck = Deck()
@@ -81,7 +78,7 @@ def main():
             won_games += 1
         print("looser is ", looser)
 
-    print(f"You won {won_games}/{args.num_of_games} ")
+    print(f"You won {won_games}/{args.num_of_games} games ")
 
 
 # Press the green button in the gutter to run the script.
