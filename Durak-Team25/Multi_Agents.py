@@ -2,6 +2,10 @@ import copy
 from enum import Enum
 from typing import Tuple
 
+import numpy as np
+
+from util import Counter
+
 import pygame
 
 from GameState import GameState
@@ -113,11 +117,21 @@ class KeyboardAgent(Agent):
         self._should_stop = True
 
 
+def get_hand_dicts(hand):
+    card_ranks = Counter()
+    card_suits = Counter()
+    for card in hand:
+        card_ranks[card.rank] += 1
+        card_suits[card_suits] += 1
+    return card_ranks, card_suits
+
+
 def base_evaluation(game_state):
     if game_state.is_attacking(0):
         hand, op_hand = game_state.attacker.hand, game_state.defender.hand
     else:
         op_hand, hand = game_state.attacker.hand, game_state.defender.hand
+
     return len(op_hand) - len(hand)
 
 
@@ -132,16 +146,60 @@ class MultiAgentSearchAgent(Agent):
 
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
-    def __init__(self, initial_cards=None):
-        super().__init__(initial_cards)
+    def get_action(self, game_state: GameState):
+        """
+        Returns the expectimax action using self.depth and self.evaluationFunction
 
-    def get_action(self, game_state):
+        The opponent should be modeled as choosing uniformly at random from their
+        legal moves.
         """
-        calculate the appropriate action
-        :param game_state:
-        :return:
-        """
-        pass
+        """*** YOUR CODE HERE ***"""
+        expectimax = self.expctimax(game_state, self.depth, AgentNum.Player)
+        return expectimax[1]
+
+    def expctimax(self, game_state: GameState, depth: int, agent: AgentNum):
+        # region End Condition
+        if depth == 0 or game_state.done:
+            return self.evaluation_function(game_state), Action.STOP
+        # endregion
+
+        costume_key = lambda x: x[0]
+
+        # region Expected Max
+        if agent == AgentNum.Player:
+            legal_moves = game_state.get_legal_actions(agent.value)
+            max_val = (float("-inf"), Action.STOP)
+            for move in legal_moves:
+                new_state = game_state.generate_successor(agent.value, move)
+                response_val = self.expctimax(new_state, depth - 1, AgentNum.Computer)[0], move
+                max_val = max(max_val, response_val, key=costume_key)
+            return max_val
+
+        # endregion
+
+        # region Expected Min
+        if agent == AgentNum.Computer:
+            legal_moves = game_state.get_legal_actions(agent.value)
+            succesors = []
+            for move in legal_moves:
+                succesors.append(game_state.generate_successor(agent.value, move))
+            succesors = np.array(succesors)
+            probability_s = 1 / len(succesors)
+            vfunc_expectimax = np.vectorize(self.expctimax)
+            responses = vfunc_expectimax(succesors, depth, agent.Player)
+            expectation = np.sum(responses[0] * probability_s), Action.STOP
+            return expectation
+
+        # endregion
+        return
+
+    def copy(self):
+        new_agent = ExpectimaxAgent()
+        new_hand = []
+        for card in self.hand:
+            new_hand.append(card.copy())
+        new_agent.hand = new_hand
+        return new_agent
 
 
 class MinmaxAgent(MultiAgentSearchAgent):

@@ -56,7 +56,7 @@ def main():
     # displays = ['GUI', 'SummaryDisplay']
     agents = ["KeyboardAgent", 'ExpectimaxAgent', "MinimaxAgent"]
     # parser.add_argument('--display', choices=displays, help='The game ui.', default=displays[0], type=str)
-    parser.add_argument('--agent', choices=agents, help='The agent.', default=agents[2], type=str)
+    parser.add_argument('--agent', choices=agents, help='The agent.', default=agents[1], type=str)
     parser.add_argument('--depth', help='The maximum depth for to search in the game tree.', default=2, type=int)
     parser.add_argument('--sleep_between_actions', help='Should sleep between actions.', default=False, type=bool)
     parser.add_argument('--num_of_games', help='The number of games to run.', default=3, type=int)
