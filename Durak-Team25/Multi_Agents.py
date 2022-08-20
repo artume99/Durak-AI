@@ -113,8 +113,8 @@ class KeyboardAgent(Agent):
         self._should_stop = True
 
 
-def base_evaluation(game_state):
-    return 5
+def base_evaluation(game_state, hand, op_hand):
+    return len(op_hand) - len(hand)
 
 
 class MultiAgentSearchAgent(Agent):
@@ -142,30 +142,17 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
 
 class MinmaxAgent(MultiAgentSearchAgent):
     def get_action(self, game_state: GameState):
-        """
-        Returns the minimax action from the current gameState using self.depth
-        and self.evaluationFunction.
-
-        Here are some method calls that might be useful when implementing minimax.
-
-        game_state.get_legal_actions(agent_index):
-            Returns a list of legal actions for an agent
-            agent_index=0 means our agent, the opponent is agent_index=1
-
-        Action.STOP:
-            The stop direction, which is always legal
-
-        game_state.generate_successor(agent_index, action):
-            Returns the successor game state after an agent takes an action
-        """
-        """*** YOUR CODE HERE ***"""
         minimax = self.minimax(game_state, self.depth, AgentNum.Player)
         return minimax[1]
 
     def minimax(self, game_state: GameState, depth: int, agent: AgentNum) -> Tuple[int, Action]:
         # region if 𝑑𝑒𝑝𝑡ℎ = 0 or v is a terminal node then return 𝑢(𝑣)
-        if depth == 0:
-            return self.evaluation_function(game_state), Action.STOP
+        if depth == 0 or game_state.done:
+            if game_state.is_attacking(0):
+                hand, op_hand = game_state.attacker.hand, game_state.defender.hand
+            else:
+                op_hand, hand = game_state.attacker.hand, game_state.defender.hand
+            return self.evaluation_function(game_state, hand, op_hand), Action.STOP
         # endregion
 
         costume_key = lambda x: x[0]

@@ -248,6 +248,12 @@ class GameState:
         cards_needed = max(0, 6 - len(player.hand))
         player.extend_hand(self.deck.hand_out_cards(cards_needed))
 
+    def is_attacking(self, index):
+        if index == 0:
+            return type(self.attacker) is not RandomOpponentAgent
+        else:
+            return type(self.attacker) is RandomOpponentAgent
+
     def generate_successor(self, agent_index, action):
         """
         generates the successor state by apllying action

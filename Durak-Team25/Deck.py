@@ -1,5 +1,6 @@
 import numpy as np
 import pygame
+from pygments.styles.paraiso_dark import BLUE
 
 from Constants import *
 from Card import Card
@@ -172,6 +173,10 @@ class Deck:
             temp_screen = pygame.transform.rotate(c.front_image,
                                                   attack_card_points[i][2])
             screen.blit(c.front_image, (attack_card_points[i][0] + 13, attack_card_points[i][1] + 13))
+
+        font = pygame.font.SysFont(None, 24)
+        img = font.render(str(self), True, BLUE)
+        screen.blit(img, (20, 20))
 
         # temp_rect = pygame.rect.Rect()
         # draw all played cards in the correct place lol

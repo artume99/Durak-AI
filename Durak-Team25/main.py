@@ -75,7 +75,8 @@ def main():
     initial_state = GameState(deck)
 
     for i in range(args.num_of_games):
-        winner = game_runner.new_game(initial_state)
+        looser = game_runner.new_game(initial_state)
+        print("looser is ", looser)
 
 
 # Press the green button in the gutter to run the script.
