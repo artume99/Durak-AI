@@ -134,7 +134,7 @@ class GameState:
             return self.defending_actions()
 
     def attacking_actions(self):
-        if len(self.cards_on_board) == 6 or len(self.attacker.hand) == 0:
+        if len(self.cards_on_board) == 12 or len(self.attacker.hand) == 0:
             return [Action.BETA]  # Return beta, max 6 cards on board
         actions = []
         if len(self.cards_on_board) > 0:  # Add beta action if there is a card in play

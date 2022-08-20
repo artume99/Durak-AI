@@ -157,7 +157,9 @@ def generate_hand_features(game_state, hand, op_hand, features):
     features["mean_rank"] = card_ranks.multiply_key_value() / cards_amount
     features["variance_rank"] = sum((features["mean_rank"] - card.rank) ** 2 for card in hand) / cards_amount
     features["variance_suit"] = card_suits.var()
-    features["min_card"] = 0 if len(hand) == 0 else hand[-1].rank
+    features["min_card"] = 15 if len(hand) == 0 else hand[-1].rank
+    features["max_card"] = 15 if len(hand) == 0 else hand[0].rank
+    features["hand_sum"] = 0 if len(hand) == 0 else sum([card.rank for card in hand])
     if len(game_state.deck) < 6:
         features["cards_on_hand"] = -cards_amount / (36 * (len(game_state.deck) + 1))
 
@@ -171,20 +173,25 @@ def base_evaluation(game_state):
         op_hand, hand = game_state.attacker.hand, game_state.defender.hand
         generate_defend_features()
     generate_hand_features(game_state, hand, op_hand, features)
-    features.normalize()
+    # features.normalize()
+
     weights = Counter()
-    weights["kozer amount"] = 10
-    weights["num of cards"] = 10
-    weights["difference between hands"] = 10
-    weights["mean_rank"] = 5
-    weights["variance_rank"] = 5
-    weights["variance_suit"] = 8
-    weights["min_card"] = 12
-    weights["cards_on_hand"] = 10
+    weights["kozer amount"] = 12
+    weights["num of cards"] = 20
+    weights["difference between hands"] = 15
+    weights["mean_rank"] = 3
+    # weights["variance_rank"] = 2
+    weights["variance_suit"] = 7
+    weights["min_card"] = 10
+    weights["max_card"] = 3
+    weights["cards_on_hand"] = 45
+    # weights["hand_sum"] = 1
 
     score = 0
+    final = {}
     for feature in features.keys():
         score += (weights[feature] * features[feature])
+        final[feature] = (weights[feature] * features[feature])
 
     return score
 
@@ -201,13 +208,6 @@ class MultiAgentSearchAgent(Agent):
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
     def get_action(self, game_state: GameState):
-        """
-        Returns the expectimax action using self.depth and self.evaluationFunction
-
-        The opponent should be modeled as choosing uniformly at random from their
-        legal moves.
-        """
-        """*** YOUR CODE HERE ***"""
         expectimax = self.expctimax(game_state, self.depth, AgentNum.Player)
         return expectimax[1]
 
@@ -294,6 +294,59 @@ class MinmaxAgent(MultiAgentSearchAgent):
 
     def copy(self):
         new_agent = MinmaxAgent()
+        new_hand = []
+        for card in self.hand:
+            new_hand.append(card.copy())
+        new_agent.hand = new_hand
+        return new_agent
+
+
+class AlphaBetaAgent(MultiAgentSearchAgent):
+
+    def get_action(self, game_state: GameState):
+
+        alpha_beta = self.alpha_beta(game_state, AgentNum.Player, self.depth)
+        return alpha_beta[1]
+
+    def alpha_beta(self, game_state: GameState, agent: AgentNum, depth: int, alpha=float("-inf"), beta=float("inf")) -> \
+            Tuple[int, Action]:
+        # region End Condition
+        if depth == 0 or game_state.done:
+            return self.evaluation_function(game_state), Action.STOP
+        # endregion
+
+        costume_key = lambda x: x[0]
+
+        # region alpha pruning
+        if agent == AgentNum.Player:
+            legal_moves = game_state.get_legal_actions(agent.value)
+            return_alpha = (alpha, Action.STOP)
+            for move in legal_moves:
+                new_state = game_state.generate_successor(agent.value, move)
+                alpha = return_alpha[0]
+                response_val = self.alpha_beta(new_state, AgentNum.Computer, depth - 1, alpha, beta)[0], move
+                return_alpha = max(return_alpha, response_val, key=costume_key)
+                if return_alpha[0] >= beta:
+                    break
+            return return_alpha
+        # endregion
+
+        # region beta pruning
+        if agent == AgentNum.Computer:
+            legal_moves = game_state.get_legal_actions(agent.value)
+            return_beta = (beta, Action.STOP)
+            for move in legal_moves:
+                new_state = game_state.generate_successor(agent.value, move)
+                beta = return_beta[0]
+                response_val = self.alpha_beta(new_state, AgentNum.Player, depth, alpha, beta)[0], move
+                return_beta = min(return_beta, response_val, key=costume_key)
+                if alpha >= return_beta[0]:
+                    break
+            return return_beta
+        # endregion
+
+    def copy(self):
+        new_agent = AlphaBetaAgent()
         new_hand = []
         for card in self.hand:
             new_hand.append(card.copy())

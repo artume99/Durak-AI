@@ -29,7 +29,8 @@ class GameRunner(object):
         op_hand = initial_state.deck.hand_out_cards(6)
         opponent_agent = RandomOpponentAgent(op_hand)
         ag_hand = initial_state.deck.hand_out_cards(6)
-        self._agent.hand = ag_hand
+        self._agent.hand = []
+        self._agent.extend_hand(ag_hand)
         game = Game(self._agent, opponent_agent, sleep_between_actions=self.sleep_between_actions)
         self.current_game = game
         return game.run(initial_state, self.screen)
@@ -46,6 +47,8 @@ def create_agent(args):
         agent = KeyboardAgent()
     elif args.agent == "MinimaxAgent":
         agent = MinmaxAgent()
+    elif args.agent == "AlphaBetaAgent":
+        agent = AlphaBetaAgent()
     return agent
 
 
@@ -54,7 +57,7 @@ def main():
     parser.add_argument('--random_seed', help='The seed for the random state.', default=numpy.random.randint(100),
                         type=int)
     # displays = ['GUI', 'SummaryDisplay']
-    agents = ["KeyboardAgent", 'ExpectimaxAgent', "MinimaxAgent"]
+    agents = ["KeyboardAgent", 'ExpectimaxAgent', "MinimaxAgent", "AlphaBetaAgent"]
     # parser.add_argument('--display', choices=displays, help='The game ui.', default=displays[0], type=str)
     parser.add_argument('--agent', choices=agents, help='The agent.', default=agents[1], type=str)
     parser.add_argument('--depth', help='The maximum depth for to search in the game tree.', default=2, type=int)
