@@ -189,6 +189,12 @@ class Counter(dict):
         maxIndex = values.index(max(values))
         return all[maxIndex][0]
 
+    def multiply_key_value(self):
+        mul = 0
+        for key, value in self.items():
+            mul += (key * value)
+        return mul
+
     def sortedKeys(self):
         """
     Returns a list of keys sorted by their values.  Keys

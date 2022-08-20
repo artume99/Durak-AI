@@ -39,8 +39,8 @@ class Card(pygame.sprite.Sprite):
             return False
         elif not self.is_kozer() and other.is_kozer():
             return True
-        t1 = self.suit, self.rank
-        t2 = other.suit, other.rank
+        t1 = self.rank, self.suit
+        t2 = other.rank, other.suit
         return t1 < t2
 
     def __lt__(self, other):
@@ -48,8 +48,8 @@ class Card(pygame.sprite.Sprite):
             return True
         elif not self.is_kozer() and other.is_kozer():
             return False
-        t1 = self.suit, self.rank
-        t2 = other.suit, other.rank
+        t1 = self.rank, self.suit
+        t2 = other.rank, other.suit
         return t1 > t2
 
     def __eq__(self, other):

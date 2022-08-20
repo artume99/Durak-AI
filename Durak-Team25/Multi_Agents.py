@@ -117,22 +117,76 @@ class KeyboardAgent(Agent):
         self._should_stop = True
 
 
+suits = {
+    'Spades': 0,
+    'Hearts': 1,
+    'Diamonds': 2,
+    'Clubs': 3,
+    0: 'Spades',
+    1: 'Hearts',
+    2: 'Diamonds',
+    3: 'Clubs'
+
+}
+
+
 def get_hand_dicts(hand):
     card_ranks = Counter()
-    card_suits = Counter()
+    card_suits = [0 for i in range(4)]
     for card in hand:
         card_ranks[card.rank] += 1
-        card_suits[card_suits] += 1
-    return card_ranks, card_suits
+        card_suits[suits[card.suit]] += 1
+    return card_ranks, np.array(card_suits)
+
+
+def generate_attack_features():
+    pass
+
+
+def generate_defend_features():
+    pass
+
+
+def generate_hand_features(game_state, hand, op_hand, features):
+    deck_amount = max(len(game_state.deck), 1)
+    cards_amount = max(len(hand), 1)
+    card_ranks, card_suits = get_hand_dicts(hand)
+    features["kozer amount"] = card_suits[suits[game_state.deck.kozer]]
+    features["num of cards"] = - len(hand) / deck_amount
+    features["difference between hands"] = (len(op_hand) - len(hand)) / deck_amount
+    features["mean_rank"] = card_ranks.multiply_key_value() / cards_amount
+    features["variance_rank"] = sum((features["mean_rank"] - card.rank) ** 2 for card in hand) / cards_amount
+    features["variance_suit"] = card_suits.var()
+    features["min_card"] = 0 if len(hand) == 0 else hand[-1].rank
+    if len(game_state.deck) < 6:
+        features["cards_on_hand"] = -cards_amount / (36 * (len(game_state.deck) + 1))
 
 
 def base_evaluation(game_state):
+    features = Counter()
     if game_state.is_attacking(0):
         hand, op_hand = game_state.attacker.hand, game_state.defender.hand
+        generate_attack_features()
     else:
         op_hand, hand = game_state.attacker.hand, game_state.defender.hand
+        generate_defend_features()
+    generate_hand_features(game_state, hand, op_hand, features)
+    features.normalize()
+    weights = Counter()
+    weights["kozer amount"] = 10
+    weights["num of cards"] = 10
+    weights["difference between hands"] = 10
+    weights["mean_rank"] = 5
+    weights["variance_rank"] = 5
+    weights["variance_suit"] = 8
+    weights["min_card"] = 12
+    weights["cards_on_hand"] = 10
 
-    return len(op_hand) - len(hand)
+    score = 0
+    for feature in features.keys():
+        score += (weights[feature] * features[feature])
+
+    return score
 
 
 class MultiAgentSearchAgent(Agent):

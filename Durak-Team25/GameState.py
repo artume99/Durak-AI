@@ -4,6 +4,7 @@ from collections import namedtuple
 from typing import List
 
 import pygame
+from pygments.styles.paraiso_dark import BLUE
 
 from Deck import Deck
 from Game import RandomOpponentAgent, Action
@@ -39,6 +40,9 @@ class GameState:
             c.load_image_assets()
 
     def render(self, screen):
+        font = pygame.font.SysFont(None, 24)
+        img = font.render(f'attacker: {self.attacker}', True, BLUE)
+        screen.blit(img, (600, 20))
         self.draw_deck(screen)
         self.draw_players(screen)
         self.deck.render(screen)
