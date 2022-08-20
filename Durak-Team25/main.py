@@ -73,10 +73,15 @@ def main():
     game_runner = GameRunner(agent, sleep_between_actions=args.sleep_between_actions)
     deck = Deck()
     initial_state = GameState(deck)
+    won_games = 0
 
     for i in range(args.num_of_games):
         looser = game_runner.new_game(initial_state)
+        if type(looser) is RandomOpponentAgent:
+            won_games += 1
         print("looser is ", looser)
+
+    print(f"You won {won_games}/{args.num_of_games} ")
 
 
 # Press the green button in the gutter to run the script.
