@@ -4,7 +4,7 @@ from collections import namedtuple
 from typing import List
 
 import pygame
-from pygments.styles.paraiso_dark import BLUE
+# from pygments.styles.paraiso_dark import BLUE
 
 from Deck import Deck
 from Game import RandomOpponentAgent, Action
@@ -199,6 +199,7 @@ class GameState:
             self._switch_roles()
         elif action is Action.TAKE:
             self.defender.extend_hand(self.cards_on_board)
+            # self.attacker.extend_op_hand(self.cards_on_board) #todo: make it work
             self._replenish_cards(self.attacker)
             self._clear_board()
         else:  # Place card

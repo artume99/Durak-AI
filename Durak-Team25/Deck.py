@@ -1,6 +1,6 @@
 import numpy as np
 import pygame
-from pygments.styles.paraiso_dark import BLUE
+# from pygments.styles.paraiso_dark import BLUE
 
 from Constants import *
 from Card import Card
