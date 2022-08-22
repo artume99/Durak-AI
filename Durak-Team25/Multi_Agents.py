@@ -181,7 +181,7 @@ def kozers_on_board(game_state, attacker: bool):
     return kozer_amount
 
 
-def kozer_percentage(game_state): #todo: check where this function should be, maybe some kind of utils?
+def kozer_percentage(game_state):  # todo: check where this function should be, maybe some kind of utils?
     kozer_amount = 0
     for card in game_state.cards_on_board:
         if card.is_kozer():
@@ -205,23 +205,24 @@ def highs_on_board(game_state, attacker: bool):
 
 def generate_attack_features(game_state, features):
     features["kozers_percentage"] = -kozer_percentage(game_state)
-    features["defender's_kozers"] = kozers_on_board(game_state, False) #as the attacker, it is good for me if the enemy
+    features["defender's_kozers"] = kozers_on_board(game_state,
+                                                    False)  # as the attacker, it is good for me if the enemy
     # gets rid of kozers
     features["attacker's_kozers"] = -kozers_on_board(game_state, True)
     features["highs_percentage"] = -highs_percentage(game_state)
     features["defender's_highs"] = highs_on_board(game_state, False)
     features["attacker's_highs"] = -highs_on_board(game_state, True)
-    features["high_threesomes"] = -1 if high_threesomes(game_state) else 1 #letting the defender hold onto a threesome
+    features["high_threesomes"] = -1 if high_threesomes(game_state) else 1  # letting the defender hold onto a threesome
     # is far worse than bita
     # features[""]
 
 
 def generate_defend_features(game_state, features):
-    features["kozers_percentage"] = -kozer_percentage(game_state) #1: i'm still not sure if it's good or bad for the
+    features["kozers_percentage"] = -kozer_percentage(game_state)  # 1: i'm still not sure if it's good or bad for the
     # defender, probably useless.. 2: on second thought, it's better for me as the defender not to have kozers on the board
-    features["defender's_kozers"] = -kozers_on_board(game_state, False) #as the defender, i don't want to get rid of
+    features["defender's_kozers"] = -kozers_on_board(game_state, False)  # as the defender, i don't want to get rid of
     # kozers MORE THAN I HAVE TO. need to think about it, it depends on the kozer and on the amount of cards on board..
-    features["attacker's_kozers"] = kozers_on_board(game_state, True) #is it good though? I'm afraid it will prompt a
+    features["attacker's_kozers"] = kozers_on_board(game_state, True)  # is it good though? I'm afraid it will prompt a
     # move that will make the attacker attack me with more kozers.. it's nice when the enemy gets rid of kozers, but
     # it's better when he doesn't attck me with them
 
@@ -245,24 +246,24 @@ def generate_hand_features(game_state, hand, op_hand, features):
 
 def calculate_weights(weights):
     # hand features
-    # weights["kozer amount"] = 12
-    # weights["num of cards"] = 20
-    weights["difference between hands"] = 1 #15
-    # weights["mean_rank"] = 3
-    # # weights["variance_rank"] = 2
-    # weights["variance_suit"] = 7
-    # weights["min_card"] = 10
-    # weights["max_card"] = 3
-    # weights["cards_on_hand"] = 45
-    # # weights["hand_sum"] = 1
+    weights["kozer amount"] = 12
+    weights["num of cards"] = 20
+    weights["difference between hands"] = 15  # 15
+    weights["mean_rank"] = 3
+    # weights["variance_rank"] = 2
+    weights["variance_suit"] = 7
+    weights["min_card"] = 10
+    weights["max_card"] = 3
+    weights["cards_on_hand"] = 45
+    # weights["hand_sum"] = 1
 
     # attacker features
     # weights["kozers_percentage"] = 0 #useless?
-    weights["defender's_kozers"] = 1 #3 priority
-    weights["attacker's_kozers"] = 3 #2 priority
-    weights["highs_percentage"] = 1 #1 priority
+    weights["defender's_kozers"] = 1  # 3 priority
+    weights["attacker's_kozers"] = 3  # 2 priority
+    weights["highs_percentage"] = 1  # 1 priority
     weights["defender's_highs"] = 3
-    weights["attacker's_highs"] = 1 #1 priority
+    weights["attacker's_highs"] = 1  # 1 priority
     weights["high_threesomes"] = 1
 
     # defender features
@@ -272,10 +273,10 @@ def base_evaluation(game_state):
     features = Counter()
     if game_state.is_attacking(0):
         hand, op_hand = game_state.attacker.hand, game_state.defender.hand
-        generate_attack_features(game_state, hand, op_hand, features)
+        # generate_attack_features(game_state, features)
     else:
         op_hand, hand = game_state.attacker.hand, game_state.defender.hand
-        generate_defend_features()
+        # generate_defend_features(game_state, features)
     generate_hand_features(game_state, hand, op_hand, features)
     # features.normalize()
 
@@ -292,7 +293,7 @@ def base_evaluation(game_state):
 
 
 class MultiAgentSearchAgent(Agent):
-    def __init__(self, evaluation_function=base_evaluation, depth=1):
+    def __init__(self, evaluation_function=base_evaluation, depth=2):
         super().__init__()
         self.evaluation_function = evaluation_function
         self.depth = depth
