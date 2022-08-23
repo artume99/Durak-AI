@@ -272,11 +272,11 @@ def base_evaluation(game_state):
     features = Counter()
     if game_state.is_attacking(0):
         hand, op_hand = game_state.attacker.hand, game_state.defender.hand
-        generate_attack_features(game_state, hand, op_hand, features)
+        generate_attack_features(game_state,features)
     else:
         op_hand, hand = game_state.attacker.hand, game_state.defender.hand
-        generate_defend_features()
-    generate_hand_features(game_state, hand, op_hand, features)
+        # generate_defend_features()
+    generate_hand_features(game_state,hand, op_hand, features)
     # features.normalize()
 
     weights = Counter()

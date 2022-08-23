@@ -47,6 +47,7 @@ class Deck:
     def flip_top_card(self):
         # To be called at the start of the game, before cards are dealt
         self.top_card = self.pop()
+        self.top_card.kozer = True
         self.kozer = self.top_card.suit
         for card in self.cards_list:
             if card.suit == self.kozer:
