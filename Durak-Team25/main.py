@@ -40,7 +40,7 @@ class GameRunner(object):
             self.current_game.quit()
 
 
-def create_agent(args):
+def create_agent(args, weights = None):
     if args.agent == "ExpectimaxAgent":
         agent = ExpectimaxAgent()
     elif args.agent == "KeyboardAgent":
@@ -50,8 +50,20 @@ def create_agent(args):
     elif args.agent == "AlphaBetaAgent":
         agent = AlphaBetaAgent()
     elif args.agent == "GeneticAgent":
-        agent = GeneticAgent()
+        agent = GeneticAgent(weights)
+
+        # get current weight vector
+        # with open(WEIGHT_VECTOR, 'rb') as f:
+        #     data = pickle.load(f)
+        #     self.vector1 = data[0]
+        #     self.vector2 = data[1]
+        # with open(WINS_LAST_ITER, 'rb') as f:
+        #     self.last_game_wins = pickle.load(f)
     return agent
+
+
+def create_offsprings(num_offsprings, parentA, parentB):
+    return [parentA, parentB]
 
 
 def main():
@@ -64,14 +76,52 @@ def main():
     parser.add_argument('--agent', choices=agents, help='The agent.', default=agents[4], type=str)
     parser.add_argument('--depth', help='The maximum depth for to search in the game tree.', default=2, type=int)
     parser.add_argument('--sleep_between_actions', help='Should sleep between actions.', default=False, type=bool)
-    parser.add_argument('--num_of_games', help='The number of games to run.', default=10, type=int)
-
+    parser.add_argument('--num_of_games', help='The number of games to run.', default=2, type=int)
+    parser.add_argument('--num_of_generations', help='The number of generations to run.',
+                        default=2, type=int)
+    parser.add_argument('--num_of_offsprings', help='The number of offsprings to spawn.',
+                        default=2, type=int)
     parser.add_argument('--evaluation_function', help='The evaluation function for ai agent.',
                         default='score_evaluation_function', type=str)
     args = parser.parse_args()
     numpy.random.seed(args.random_seed)
 
-    agent = create_agent(args)
+    if args.agent == "GeneticAgent":
+        parentA, parentB = Counter(), Counter()
+        calculate_weights(parentA, 2)
+        calculate_weights(parentB, 0.5)
+
+        for gen in range(args.num_of_generations):
+            offspring_score = dict()
+            for ind, offspring in enumerate(create_offsprings(args.num_of_offsprings, parentA, parentB)):
+                agent = GeneticAgent(offspring)
+                score = run_games(args, agent)
+                offspring_score[ind] = (offspring, score)
+            sorted(offspring_score.items(), key=lambda item: item[1][1])
+            data = list(offspring_score.keys())
+            parentA, parentB = offspring_score[data[0]][0], offspring_score[data[1]][0]
+            print("generation: " + str(gen))
+
+        # get final offspring
+        for ind, offspring in enumerate([parentA, parentB]):
+            agent = GeneticAgent(offspring)
+            score = run_games(args, agent)
+            offspring_score[ind] = (offspring, score)
+            sorted(offspring_score.items(), key=lambda item: item[1][1])
+            data = list(offspring_score.keys())
+        # hes the best, around
+        rocky, score = offspring_score[data[0]][0], offspring_score[data[0]][1]
+
+        # with open(, 'wb') as f:
+        #     pickle.dump(won_games, f)
+        print("best score was: " + str(score))
+        print(rocky)
+    else:
+        agent = create_agent(args)
+        run_games(args, agent)
+
+
+def run_games(args, agent):
     game_runner = GameRunner(agent, sleep_between_actions=args.sleep_between_actions)
     deck = Deck()
     initial_state = GameState(deck)
@@ -84,10 +134,7 @@ def main():
         print("looser is ", looser)
 
     print(f"You won {won_games}/{args.num_of_games} games ")
-
-    with open(WINS_LAST_ITER, 'wb') as f:
-        pickle.dump(won_games, f)
-
+    return won_games / args.num_of_games
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':

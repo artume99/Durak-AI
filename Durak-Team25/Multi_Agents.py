@@ -222,27 +222,27 @@ def generate_hand_features(game_state, hand, op_hand, features):
         features["cards_on_hand"] = -cards_amount / (36 * (len(game_state.deck) + 1))
 
 
-def calculate_weights(weights):
+def calculate_weights(weights, mult = 1):
     # hand features
-    # weights["kozer amount"] = 12
-    # weights["num of cards"] = 20
-    weights["difference between hands"] = 1 #15
-    # weights["mean_rank"] = 3
-    # # weights["variance_rank"] = 2
-    # weights["variance_suit"] = 7
-    # weights["min_card"] = 10
-    # weights["max_card"] = 3
-    # weights["cards_on_hand"] = 45
-    # # weights["hand_sum"] = 1
+    # weights["kozer amount"] = 12 * mult
+    # weights["num of cards"] = 20 * mult
+    weights["difference between hands"] = 1 * mult #15
+    # weights["mean_rank"] = 3 * mult
+    # # weights["variance_rank"] = 2 * mult
+    # weights["variance_suit"] = 7 * mult
+    # weights["min_card"] = 10 * mult
+    # weights["max_card"] = 3 * mult
+    # weights["cards_on_hand"] = 45 * mult
+    # # weights["hand_sum"] = 1 * mult
 
     # attacker features
-    # weights["kozers_percentage"] = 0 #useless?
-    weights["defender's_kozers"] = 1 #3 priority
-    weights["attacker's_kozers"] = 3 #2 priority
-    weights["highs_percentage"] = 1 #1 priority
-    weights["defender's_highs"] = 3
-    weights["attacker's_highs"] = 1 #1 priority
-    weights["high_threesomes"] = 1
+    # weights["kozers_percentage"] = 0 * mult #useless?
+    weights["defender's_kozers"] = 1 * mult #3 priority
+    weights["attacker's_kozers"] = 3 * mult #2 priority
+    weights["highs_percentage"] = 1 * mult #1 priority
+    weights["defender's_highs"] = 3 * mult
+    weights["attacker's_highs"] = 1 * mult #1 priority
+    weights["high_threesomes"] = 1 * mult
 
     # defender features
 
@@ -270,45 +270,25 @@ def base_evaluation(game_state):
     return score
 
 
-class GeneticAgent(Agent):
-    def __init__(self):
-        super().__init__()
+def genetic_evaluation(game_state, weights):
+    features = Counter()
+    if game_state.is_attacking(0):
+        hand, op_hand = game_state.attacker.hand, game_state.defender.hand
+        generate_attack_features(game_state, features)
+    else:
+        op_hand, hand = game_state.attacker.hand, game_state.defender.hand
+        # generate_defend_features()
+    generate_hand_features(game_state, hand, op_hand, features)
+    # features.normalize()
 
-        # initialize weight vector
-        if not os.path.exists(WEIGHT_VECTOR):
-            weights = Counter()
-            calculate_weights(weights)
-            with open(WEIGHT_VECTOR, 'wb') as f:
-                pickle.dump(weights, f)
+    score = 0
+    final = {}
+    for feature in features.keys():
+        score += (weights[feature] * features[feature])
+        final[feature] = (weights[feature] * features[feature])
 
-        # get current weight vector
-        with open(WEIGHT_VECTOR, 'rb') as f:
-            self.vector = pickle.load(f)
-        with open(WINS_LAST_ITER, 'rb') as f:
-            self.last_game_wins = pickle.load(f)
+    return score
 
-    def get_action(self, game_state):
-        features = Counter()
-        if game_state.is_attacking(0):
-            hand, op_hand = game_state.attacker.hand, game_state.defender.hand
-            generate_attack_features(game_state, features)
-        else:
-            op_hand, hand = game_state.attacker.hand, game_state.defender.hand
-            # generate_defend_features()
-        generate_hand_features(game_state, hand, op_hand, features)
-        # features.normalize()
-
-        weights = Counter() * self.vector
-        # calculate_weights(weights)
-
-
-        score = 0
-        final = {}
-        for feature in features.keys():
-            score += (weights[feature] * features[feature])
-            final[feature] = (weights[feature] * features[feature])
-
-        return score
 
 class MultiAgentSearchAgent(Agent):
     def __init__(self, evaluation_function=base_evaluation, depth=1):
@@ -408,6 +388,59 @@ class MinmaxAgent(MultiAgentSearchAgent):
 
     def copy(self):
         new_agent = MinmaxAgent()
+        new_hand = []
+        for card in self.hand:
+            new_hand.append(card.copy())
+        new_agent.hand = new_hand
+        return new_agent
+
+
+class GeneticAgent(MinmaxAgent):
+    def __init__(self, weight):
+        super().__init__()
+        self.evaluation_function = genetic_evaluation
+        self.depth = 1
+        self.weight_vector = weight
+
+    def minimax(self, game_state: GameState, depth: int,
+                agent: AgentNum) -> Tuple[int, Action]:
+        # region if 𝑑𝑒𝑝𝑡ℎ = 0 or v is a terminal node then return 𝑢(𝑣)
+        if depth == 0 or game_state.done:
+            return self.evaluation_function(game_state, self.weight_vector), Action.STOP
+        # endregion
+
+        costume_key = lambda x: x[0]
+
+        # region  if isMaxNode then return max
+        if agent == AgentNum.Player:
+            legal_moves = game_state.get_legal_actions(agent.value)
+            max_val = (float("-inf"), Action.STOP)
+            for move in legal_moves:
+                new_state = game_state.generate_successor(agent.value,
+                                                          move)
+                response_val = \
+                self.minimax(new_state, depth - 1, AgentNum.Computer)[
+                    0], move
+                max_val = max(max_val, response_val, key=costume_key)
+            return max_val
+
+        # endregion
+
+        # region  if isMinNode then return min
+        if agent == AgentNum.Computer:
+            legal_moves = game_state.get_legal_actions(agent.value)
+            min_val = (float("inf"), Action.STOP)
+            for move in legal_moves:
+                new_state = game_state.generate_successor(agent.value,
+                                                          move)
+                response_val = \
+                self.minimax(new_state, depth, AgentNum.Player)[0], move
+                min_val = min(min_val, response_val, key=costume_key)
+            return min_val
+        # endregion
+
+    def copy(self):
+        new_agent = GeneticAgent(weight=None)
         new_hand = []
         for card in self.hand:
             new_hand.append(card.copy())
