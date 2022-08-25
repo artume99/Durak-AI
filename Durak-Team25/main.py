@@ -49,6 +49,8 @@ def create_agent(args):
         agent = MinmaxAgent()
     elif args.agent == "AlphaBetaAgent":
         agent = AlphaBetaAgent()
+    elif args.agent == "GeneticAgent":
+        agent = GeneticAgent()
     return agent
 
 
@@ -57,12 +59,12 @@ def main():
     parser.add_argument('--random_seed', help='The seed for the random state.', default=numpy.random.randint(100),
                         type=int)
     # displays = ['GUI', 'SummaryDisplay']
-    agents = ["KeyboardAgent", 'ExpectimaxAgent', "MinimaxAgent", "AlphaBetaAgent"]
+    agents = ["KeyboardAgent", 'ExpectimaxAgent', "MinimaxAgent", "AlphaBetaAgent", "GeneticAgent"]
     # parser.add_argument('--display', choices=displays, help='The game ui.', default=displays[0], type=str)
-    parser.add_argument('--agent', choices=agents, help='The agent.', default=agents[1], type=str)
+    parser.add_argument('--agent', choices=agents, help='The agent.', default=agents[4], type=str)
     parser.add_argument('--depth', help='The maximum depth for to search in the game tree.', default=2, type=int)
     parser.add_argument('--sleep_between_actions', help='Should sleep between actions.', default=False, type=bool)
-    parser.add_argument('--num_of_games', help='The number of games to run.', default=3, type=int)
+    parser.add_argument('--num_of_games', help='The number of games to run.', default=10, type=int)
 
     parser.add_argument('--evaluation_function', help='The evaluation function for ai agent.',
                         default='score_evaluation_function', type=str)
@@ -82,6 +84,9 @@ def main():
         print("looser is ", looser)
 
     print(f"You won {won_games}/{args.num_of_games} games ")
+
+    with open(WINS_LAST_ITER, 'wb') as f:
+        pickle.dump(won_games, f)
 
 
 # Press the green button in the gutter to run the script.

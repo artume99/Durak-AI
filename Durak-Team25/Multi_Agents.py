@@ -1,4 +1,6 @@
 import copy
+import os.path
+import pickle
 from enum import Enum
 from typing import Tuple
 
@@ -61,9 +63,6 @@ class KeyboardAgent(Agent):
         pygame.event.clear()
         while True:
             event = pygame.event.wait()
-            # if event.type == QUIT:
-            #     pygame.quit()
-            #     sys.exit()
             if event.type == KEYDOWN:
                 if event.key == K_SPACE:
                     card = self.hand[self.selected_card_ind]
@@ -92,26 +91,6 @@ class KeyboardAgent(Agent):
                         print(self.hand[self.selected_card_ind])
                         print(MSG_FOR_KEYBOARD_AGENT)
                     return Action.SWIPE
-
-        # inp = pygame.key.get_pressed()
-        # while True:
-        #     while inp[K_RIGHT]:
-        #         selected_card_ind += 1
-        #         if selected_card_ind >= len(self.hand):
-        #             selected_card_ind = 0
-        #         print("currently selected card: ", end="")
-        #         print(self.hand[selected_card_ind])
-        #         print("\ntake: up, place_card: left, swipe_right: right, beta: down\n")
-        #         inp = pygame.key.get_pressed()
-        #     if inp[K_LEFT] or inp[K_UP]:
-        #         break
-        #
-        # if inp[K_LEFT]:
-        #     return Action.TAKE
-        # elif inp[K_UP]:
-        #     return self.hand[selected_card_ind]
-        # else:
-        #     return Action.BETA
 
     def stop_running(self):
         self._should_stop = True
@@ -290,6 +269,46 @@ def base_evaluation(game_state):
 
     return score
 
+
+class GeneticAgent(Agent):
+    def __init__(self):
+        super().__init__()
+
+        # initialize weight vector
+        if not os.path.exists(WEIGHT_VECTOR):
+            weights = Counter()
+            calculate_weights(weights)
+            with open(WEIGHT_VECTOR, 'wb') as f:
+                pickle.dump(weights, f)
+
+        # get current weight vector
+        with open(WEIGHT_VECTOR, 'rb') as f:
+            self.vector = pickle.load(f)
+        with open(WINS_LAST_ITER, 'rb') as f:
+            self.last_game_wins = pickle.load(f)
+
+    def get_action(self, game_state):
+        features = Counter()
+        if game_state.is_attacking(0):
+            hand, op_hand = game_state.attacker.hand, game_state.defender.hand
+            generate_attack_features(game_state, features)
+        else:
+            op_hand, hand = game_state.attacker.hand, game_state.defender.hand
+            # generate_defend_features()
+        generate_hand_features(game_state, hand, op_hand, features)
+        # features.normalize()
+
+        weights = Counter() * self.vector
+        # calculate_weights(weights)
+
+
+        score = 0
+        final = {}
+        for feature in features.keys():
+            score += (weights[feature] * features[feature])
+            final[feature] = (weights[feature] * features[feature])
+
+        return score
 
 class MultiAgentSearchAgent(Agent):
     def __init__(self, evaluation_function=base_evaluation, depth=1):

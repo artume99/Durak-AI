@@ -269,8 +269,6 @@ class GameState:
         new_deck = self.deck.copy()
         attacker = self.attacker.copy()
         defender = self.defender.copy()
-        # attacker = copy.copy(self.attacker)
-        # defender = copy.copy(self.defender)
         successor = GameState(deck=new_deck, done=self._done, attacker=attacker,
                               defender=defender, card_in_play=copy.copy(self.card_in_play),
                               cards_on_board=copy.copy(self.cards_on_board))
