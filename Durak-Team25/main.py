@@ -7,6 +7,7 @@ from Deck import Deck
 from Game import Game, RandomOpponentAgent
 from GameState import GameState
 from Constants import *
+import util
 
 
 class GameRunner(object):
@@ -31,7 +32,8 @@ class GameRunner(object):
         ag_hand = initial_state.deck.hand_out_cards(6)
         self._agent.hand = []
         self._agent.extend_hand(ag_hand)
-        game = Game(self._agent, opponent_agent, sleep_between_actions=self.sleep_between_actions)
+        game = Game(self._agent, opponent_agent,
+                    sleep_between_actions=self.sleep_between_actions)
         self.current_game = game
         return game.run(initial_state, self.screen)
 
@@ -40,7 +42,7 @@ class GameRunner(object):
             self.current_game.quit()
 
 
-def create_agent(args, weights = None):
+def create_agent(args, weights=None):
     if args.agent == "ExpectimaxAgent":
         agent = ExpectimaxAgent()
     elif args.agent == "KeyboardAgent":
@@ -62,26 +64,61 @@ def create_agent(args, weights = None):
     return agent
 
 
-def create_offsprings(num_offsprings, parentA, parentB):
-    return [parentA, parentB]
+def create_offspring(p1: Counter, p2: Counter, args):
+    offspring = copy.copy(p1)
+    for i in offspring:
+        if util.flipCoin(0.5):
+            offspring[i] = p2[i]
+        if util.flipCoin(args.mutation_coef):
+            print("A mutation has occurred!!!")
+            if util.flipCoin(0.5):
+                offspring[i] *= args.mutation_strength
+            else:
+                offspring[i] /= args.mutation_strength
+    print(offspring)
+    return offspring
+
+
+def create_offsprings(args, parentA, parentB):
+    little_shits = []
+    for i in range(args.num_of_offsprings):
+        little_shits.append(create_offspring(parentA, parentB, args))
+    return little_shits
 
 
 def main():
     parser = argparse.ArgumentParser(description='Durak game.')
-    parser.add_argument('--random_seed', help='The seed for the random state.', default=numpy.random.randint(100),
+    parser.add_argument('--random_seed', help='The seed for the random state.',
+                        default=numpy.random.randint(100),
                         type=int)
     # displays = ['GUI', 'SummaryDisplay']
-    agents = ["KeyboardAgent", 'ExpectimaxAgent', "MinimaxAgent", "AlphaBetaAgent", "GeneticAgent"]
+    agents = ["KeyboardAgent", 'ExpectimaxAgent', "MinimaxAgent",
+              "AlphaBetaAgent", "GeneticAgent"]
     # parser.add_argument('--display', choices=displays, help='The game ui.', default=displays[0], type=str)
-    parser.add_argument('--agent', choices=agents, help='The agent.', default=agents[4], type=str)
-    parser.add_argument('--depth', help='The maximum depth for to search in the game tree.', default=2, type=int)
-    parser.add_argument('--sleep_between_actions', help='Should sleep between actions.', default=False, type=bool)
-    parser.add_argument('--num_of_games', help='The number of games to run.', default=2, type=int)
-    parser.add_argument('--num_of_generations', help='The number of generations to run.',
+    parser.add_argument('--agent', choices=agents, help='The agent.',
+                        default=agents[4], type=str)
+    parser.add_argument('--depth',
+                        help='The maximum depth for to search in the game tree.',
                         default=2, type=int)
-    parser.add_argument('--num_of_offsprings', help='The number of offsprings to spawn.',
+    parser.add_argument('--sleep_between_actions',
+                        help='Should sleep between actions.', default=False,
+                        type=bool)
+    parser.add_argument('--num_of_games', help='The number of games to run.',
                         default=2, type=int)
-    parser.add_argument('--evaluation_function', help='The evaluation function for ai agent.',
+    parser.add_argument('--num_of_generations',
+                        help='The number of generations to run.',
+                        default=2, type=int)
+    parser.add_argument('--num_of_offsprings',
+                        help='The number of offsprings to spawn.',
+                        default=2, type=int)
+    parser.add_argument('--mutation_coef',
+                        help='Chance of a mutation occuring.',
+                        default=0.05, type=int)
+    parser.add_argument('--mutation_strength',
+                        help='Strength of a mutation.',
+                        default=2, type=int)
+    parser.add_argument('--evaluation_function',
+                        help='The evaluation function for ai agent.',
                         default='score_evaluation_function', type=str)
     args = parser.parse_args()
     numpy.random.seed(args.random_seed)
@@ -93,13 +130,15 @@ def main():
 
         for gen in range(args.num_of_generations):
             offspring_score = dict()
-            for ind, offspring in enumerate(create_offsprings(args.num_of_offsprings, parentA, parentB)):
+            for ind, offspring in enumerate(
+                    create_offsprings(args, parentA, parentB)):
                 agent = GeneticAgent(offspring)
                 score = run_games(args, agent)
                 offspring_score[ind] = (offspring, score)
             sorted(offspring_score.items(), key=lambda item: item[1][1])
             data = list(offspring_score.keys())
-            parentA, parentB = offspring_score[data[0]][0], offspring_score[data[1]][0]
+            parentA, parentB = offspring_score[data[0]][0], \
+                               offspring_score[data[1]][0]
             print("generation: " + str(gen))
 
         # get final offspring
@@ -122,7 +161,8 @@ def main():
 
 
 def run_games(args, agent):
-    game_runner = GameRunner(agent, sleep_between_actions=args.sleep_between_actions)
+    game_runner = GameRunner(agent,
+                             sleep_between_actions=args.sleep_between_actions)
     deck = Deck()
     initial_state = GameState(deck)
     won_games = 0
@@ -136,7 +176,7 @@ def run_games(args, agent):
     print(f"You won {won_games}/{args.num_of_games} games ")
     return won_games / args.num_of_games
 
+
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     main()
-

@@ -9,6 +9,7 @@
 import sys
 import inspect
 import heapq, random
+import numpy as np
 
 """
  Data structures useful for implementing SearchAgents
@@ -415,7 +416,7 @@ def getProbability(value, distribution, values):
 
 
 def flipCoin(p):
-    r = random.random()
+    r = np.random.random_sample()
     return r < p
 
 
