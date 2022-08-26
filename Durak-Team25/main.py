@@ -1,5 +1,6 @@
 import argparse
 
+from Logger import Logger
 import numpy
 import pygame
 from Multi_Agents import *
@@ -139,6 +140,11 @@ def main():
             data = list(offspring_score.keys())
             parentA, parentB = offspring_score[data[0]][0], \
                                offspring_score[data[1]][0]
+            score = offspring_score[data[0]][1]
+            Logger.add_genetic_table_entry(seed=args.random_seed, num_of_games=args.num_of_games,
+                                           num_of_generations=args.num_of_generations,
+                                           num_of_offsprings=args.num_of_offsprings, mutation_coef=args.mutation_coef,
+                                           mutation_strength=args.mutation_strength, current_gen=gen + 1, score=score)
             print("generation: " + str(gen))
 
         # get final offspring
@@ -158,6 +164,7 @@ def main():
     else:
         agent = create_agent(args)
         run_games(args, agent)
+    Logger.write_to_log()
 
 
 def run_games(args, agent):

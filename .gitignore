@@ -1,3 +1,6 @@
 [V]venv
 .idea
 __pycache__
+
+#Logs
+Logs/
