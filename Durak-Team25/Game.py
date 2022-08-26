@@ -11,7 +11,7 @@ from Deck import Deck
 from typing import List, Iterable
 from types import FunctionType
 
-
+from Logger import Logger
 
 
 class Action(Enum):
@@ -163,7 +163,8 @@ class Game:
             while action is Action.SWIPE:
                 action = self._state.attacker.get_action(self._state)
                 self.render()
-
+            Logger.info("Attacker played: " + str(action))
+            Logger.info("Current state is " + str(self._state))
             self._state.apply_attack_action(action)
             if self.sleep_between_actions:
                 time.sleep(1)
@@ -178,6 +179,8 @@ class Game:
             while opponent_action is Action.SWIPE:
                 opponent_action = self._state.defender.get_action(self._state)
                 self.render()
+            Logger.info("Defender played: " + str(opponent_action))
+            Logger.info("Current state is " + str(self._state))
 
             self._state.apply_defend_action(opponent_action)
             if self.sleep_between_actions:

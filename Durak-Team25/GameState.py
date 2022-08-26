@@ -279,3 +279,9 @@ class GameState:
         else:
             raise Exception("illegal agent index.")
         return successor
+
+    def __str__(self):
+        return f"Current Attacker: {self.attacker} \n" \
+               f"Cards on board {self.cards_on_board} \n" \
+               f"Card in play {self.card_in_play} \n" \
+               f"{self.deck} \n"

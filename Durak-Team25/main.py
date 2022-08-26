@@ -71,11 +71,13 @@ def create_offspring(p1: Counter, p2: Counter, args):
         if util.flipCoin(0.5):
             offspring[i] = p2[i]
         if util.flipCoin(args.mutation_coef):
+            Logger.info("A mutation has occurred!!!")
             print("A mutation has occurred!!!")
             if util.flipCoin(0.5):
                 offspring[i] *= args.mutation_strength
             else:
                 offspring[i] /= args.mutation_strength
+    Logger.info(str(offspring))
     print(offspring)
     return offspring
 
@@ -108,7 +110,7 @@ def main():
                         default=2, type=int)
     parser.add_argument('--num_of_generations',
                         help='The number of generations to run.',
-                        default=2, type=int)
+                        default=3, type=int)
     parser.add_argument('--num_of_offsprings',
                         help='The number of offsprings to spawn.',
                         default=2, type=int)
@@ -145,15 +147,16 @@ def main():
                                            num_of_generations=args.num_of_generations,
                                            num_of_offsprings=args.num_of_offsprings, mutation_coef=args.mutation_coef,
                                            mutation_strength=args.mutation_strength, current_gen=gen + 1, score=score)
-            print("generation: " + str(gen))
+            Logger.info("generation: " + str(gen + 1))
+            print("generation: " + str(gen + 1))
 
         # get final offspring
-        for ind, offspring in enumerate([parentA, parentB]):
-            agent = GeneticAgent(offspring)
-            score = run_games(args, agent)
-            offspring_score[ind] = (offspring, score)
-            sorted(offspring_score.items(), key=lambda item: item[1][1])
-            data = list(offspring_score.keys())
+        # for ind, offspring in enumerate([parentA, parentB]):
+        #     agent = GeneticAgent(offspring)
+        #     score = run_games(args, agent)
+        #     offspring_score[ind] = (offspring, score)
+        #     sorted(offspring_score.items(), key=lambda item: item[1][1])
+        #     data = list(offspring_score.keys())
         # hes the best, around
         rocky, score = offspring_score[data[0]][0], offspring_score[data[0]][1]
 
@@ -161,6 +164,7 @@ def main():
         #     pickle.dump(won_games, f)
         print("best score was: " + str(score))
         print(rocky)
+        Logger.info("best score was: " + str(score) + "\n best rocky was " + str(rocky))
     else:
         agent = create_agent(args)
         run_games(args, agent)

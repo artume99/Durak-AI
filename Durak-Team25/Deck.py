@@ -94,7 +94,6 @@ class Deck:
             cx_index = c_index % (card_count_y // 2) if c_index % (
                     card_count_y // 2) != 0 else card_count_y // 2
             cy_index = (c_index - cx_index) // (card_count_y // 2)
-            print(c_index, cx_index, cy_index)
             if cx_index == 1:
                 left_row_y = SCREEN_HEIGHT // 2 - card_width // 2
                 temp_pos = (left_row_x * (cy_index + 1), left_row_y, 90)
@@ -131,7 +130,6 @@ class Deck:
                     temp_pos = (left_row_x * (cy_index + 1), temp_y, 90)
                     position_list.append(temp_pos)
                 self.card_pos.update({c_index: position_list})
-        print(self.card_pos)
 
     def render(self, screen):
         # GOAL->Draw for each space for each row given the size
@@ -150,10 +148,6 @@ class Deck:
                     5 * card_height // 6)
             if found_x_card_count and found_y_card_count:
                 self.found_size = True
-                print("SCREEN_WIDTH", SCREEN_WIDTH - (2 * card_height // 3))
-                print("build_size_width", build_size_width)
-                print(card_count_x, "cards can be played horizontally")
-                print(card_width + card_gap)
                 self.get_card_indexes(card_count_x, card_count_y * 2)
             if not found_x_card_count:
                 build_size_width = build_size_width + card_gap // 2 + card_width

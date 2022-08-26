@@ -10,7 +10,7 @@ class Logger:
     genetic_table = pd.DataFrame(columns=columns)
 
     @staticmethod
-    def add_info_message(message: str):
+    def info(message: str):
         Logger.log.write(message + "\n")
 
     @staticmethod
