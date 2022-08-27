@@ -24,12 +24,13 @@ class GameRunner(object):
         self._agent = agent
         self.current_game = None
 
-    def new_game(self, initial_state, *args, **kw):
+    def new_game(self, initial_state, args):
         self.quit_game()
         initial_state.finish_game()
         initial_state.reshuffle()
         op_hand = initial_state.deck.hand_out_cards(6)
-        opponent_agent = RandomOpponentAgent(op_hand)
+        opponent_agent = create_opponent(args)
+        opponent_agent.hand = op_hand
         ag_hand = initial_state.deck.hand_out_cards(6)
         self._agent.hand = []
         self._agent.extend_hand(ag_hand)
@@ -54,6 +55,8 @@ def create_agent(args, weights=None):
         agent = AlphaBetaAgent(depth=args.depth)
     elif args.agent == "GeneticAgent":
         agent = GeneticAgent(weights)
+    elif args.agent == "RandomOpponentAgent":
+        agent = RandomOpponentAgent()
 
         # get current weight vector
         # with open(WEIGHT_VECTOR, 'rb') as f:
@@ -63,6 +66,21 @@ def create_agent(args, weights=None):
         # with open(WINS_LAST_ITER, 'rb') as f:
         #     self.last_game_wins = pickle.load(f)
     return agent
+
+def create_opponent(args):
+    if args.opponent == "ExpectimaxAgent":
+        op = ExpectimaxAgent(depth=args.depth)
+    elif args.opponent == "KeyboardAgent":
+        op = KeyboardAgent()
+    elif args.opponent == "MinimaxAgent":
+        op = MinmaxAgent(depth=args.depth)
+    elif args.opponent == "AlphaBetaAgent":
+        op = AlphaBetaAgent(depth=args.depth)
+    elif args.opponent == "RandomOpponentAgent":
+        op = RandomOpponentAgent()
+    else:
+        raise Exception("Can't do")
+    return op
 
 
 def create_offspring(p1: Counter, p2: Counter, args):
@@ -95,14 +113,14 @@ def main():
                         default=numpy.random.randint(100),
                         type=int)
     agents = ["KeyboardAgent", 'ExpectimaxAgent', "MinimaxAgent",
-              "AlphaBetaAgent", "GeneticAgent"]
+              "AlphaBetaAgent", "GeneticAgent", "RandomOpponentAgent"]
     parser.add_argument('--agent', choices=agents, help='The agent.',
                         default=agents[4], type=str)
     parser.add_argument('--depth',
                         help='The maximum depth for to search in the game tree.',
                         default=2, type=int)
     parser.add_argument('--sleep_between_actions',
-                        help='Should sleep between actions.', default=False,
+                        help='Should sleep between actions.', default=True,
                         type=bool)
     parser.add_argument('--num_of_games', help='The number of games to run.',
                         default=2, type=int)
@@ -123,7 +141,7 @@ def main():
                         default='score_evaluation_function', type=str)
     parser.add_argument('--opponent',
                         help='Opponent to play against',
-                        default='RandomOpponentAgent', type=str)
+                        default=agents[-1], type=str)
 
     args = parser.parse_args()
     numpy.random.seed(args.random_seed)
@@ -178,12 +196,11 @@ def run_games(args, agent):
                              sleep_between_actions=args.sleep_between_actions)
     deck = Deck()
     initial_state = GameState(deck)
-    initial_state.Opponent = args.opponent
     won_games = 0
 
     for i in range(args.num_of_games):
         Logger.info(f"Game #{i + 1}")
-        looser = game_runner.new_game(initial_state)
+        looser = game_runner.new_game(initial_state, args)
         if type(looser) is RandomOpponentAgent:
             won_games += 1
         Logger.info(f"looser is {looser}")
