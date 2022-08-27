@@ -151,6 +151,7 @@ class Game:
         self._state.defender = defender
 
         while not self._state.done and not self._should_quit:
+            pygame.event.pump()
             self.set_background()
             self._state.render(self.screen)
             pygame.display.flip()

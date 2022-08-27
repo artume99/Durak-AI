@@ -13,6 +13,8 @@ from Constants import *
 
 
 class GameState:
+    Opponent = RandomOpponentAgent
+
     def __init__(self, deck: Deck = None, done=False, attacker=None, defender=None, card_in_play=None,
                  cards_on_board=None):
         super(GameState, self).__init__()
@@ -50,7 +52,7 @@ class GameState:
     def draw_players(self, screen):
         players = [self.attacker, self.defender]
         for p in players:
-            if type(p) is not RandomOpponentAgent:
+            if type(p) is not GameState.Opponent:
                 user_cards_x = SCREEN_WIDTH // 4
                 user_cards_x_end = SCREEN_WIDTH - SCREEN_WIDTH // 4
                 user_cards_gap = (user_cards_x_end - user_cards_x) / (len(p.hand) + 1)
@@ -112,13 +114,13 @@ class GameState:
         Checks the type of the player (attack, defend) and returns it's actions
         :return:
         """
-        if type(self.attacker) is RandomOpponentAgent:
+        if type(self.attacker) is GameState.Opponent:
             return self.apply_defend_action(action)
         else:
             return self.apply_attack_action(action)
 
     def apply_opponent_action(self, action):
-        if type(self.attacker) is RandomOpponentAgent:
+        if type(self.attacker) is GameState.Opponent:
             self.apply_attack_action(action)
         else:
             return self.apply_defend_action(action)
@@ -128,7 +130,7 @@ class GameState:
         Checks the type of the opponent (attack, defend) and returns it's actions
         :return:
         """
-        if type(self.attacker) is RandomOpponentAgent:
+        if type(self.attacker) is GameState.Opponent:
             return self.attacking_actions()
         else:
             return self.defending_actions()
@@ -177,7 +179,7 @@ class GameState:
         Checks the type of the player (attack, defend) and returns it's actions
         :return:
         """
-        if type(self.attacker) is RandomOpponentAgent:
+        if type(self.attacker) is GameState.Opponent:
             return self.defending_actions()
         else:
             return self.attacking_actions()
@@ -255,9 +257,9 @@ class GameState:
 
     def is_attacking(self, index):
         if index == 0:
-            return type(self.attacker) is not RandomOpponentAgent
+            return type(self.attacker) is not GameState.Opponent
         else:
-            return type(self.attacker) is RandomOpponentAgent
+            return type(self.attacker) is GameState.Opponent
 
     def generate_successor(self, agent_index, action):
         """

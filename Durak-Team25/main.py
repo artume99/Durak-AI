@@ -45,13 +45,13 @@ class GameRunner(object):
 
 def create_agent(args, weights=None):
     if args.agent == "ExpectimaxAgent":
-        agent = ExpectimaxAgent()
+        agent = ExpectimaxAgent(depth=args.depth)
     elif args.agent == "KeyboardAgent":
         agent = KeyboardAgent()
     elif args.agent == "MinimaxAgent":
-        agent = MinmaxAgent()
+        agent = MinmaxAgent(depth=args.depth)
     elif args.agent == "AlphaBetaAgent":
-        agent = AlphaBetaAgent()
+        agent = AlphaBetaAgent(depth=args.depth)
     elif args.agent == "GeneticAgent":
         agent = GeneticAgent(weights)
 
@@ -94,10 +94,8 @@ def main():
     parser.add_argument('--random_seed', help='The seed for the random state.',
                         default=numpy.random.randint(100),
                         type=int)
-    # displays = ['GUI', 'SummaryDisplay']
     agents = ["KeyboardAgent", 'ExpectimaxAgent', "MinimaxAgent",
               "AlphaBetaAgent", "GeneticAgent"]
-    # parser.add_argument('--display', choices=displays, help='The game ui.', default=displays[0], type=str)
     parser.add_argument('--agent', choices=agents, help='The agent.',
                         default=agents[4], type=str)
     parser.add_argument('--depth',
@@ -123,6 +121,10 @@ def main():
     parser.add_argument('--evaluation_function',
                         help='The evaluation function for ai agent.',
                         default='score_evaluation_function', type=str)
+    parser.add_argument('--opponent',
+                        help='Opponent to play against',
+                        default='RandomOpponentAgent', type=str)
+
     args = parser.parse_args()
     numpy.random.seed(args.random_seed)
 
@@ -165,10 +167,10 @@ def main():
         print("best score was: " + str(score))
         print(rocky)
         Logger.info("best score was: " + str(score) + "\n best rocky was " + str(rocky))
+        Logger.write_to_log()
     else:
         agent = create_agent(args)
         run_games(args, agent)
-    Logger.write_to_log()
 
 
 def run_games(args, agent):
@@ -176,14 +178,18 @@ def run_games(args, agent):
                              sleep_between_actions=args.sleep_between_actions)
     deck = Deck()
     initial_state = GameState(deck)
+    initial_state.Opponent = args.opponent
     won_games = 0
 
     for i in range(args.num_of_games):
+        Logger.info(f"Game #{i + 1}")
         looser = game_runner.new_game(initial_state)
         if type(looser) is RandomOpponentAgent:
             won_games += 1
+        Logger.info(f"looser is {looser}")
         print("looser is ", looser)
 
+    Logger.info(f"You won {won_games}/{args.num_of_games} games ")
     print(f"You won {won_games}/{args.num_of_games} games ")
     return won_games / args.num_of_games
 

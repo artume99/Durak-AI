@@ -1,9 +1,12 @@
+import os.path
 from datetime import datetime
 import pandas as pd
 
 
 class Logger:
     now = datetime.now().strftime("%H-%M-%S")
+    if not os.path.isdir("Logs"):
+        os.mkdir("Logs")
     log = open(f"Logs/Log_{now}.txt", "a")
     columns = ["seed", "num_of_games", "num_of_generations", "num_of_offsprings", "mutation_coef",
                "mutation_strength", "current_gen", "score"]
@@ -19,7 +22,6 @@ class Logger:
         to_add = [seed, num_of_games, num_of_generations, num_of_offsprings, mutation_coef,
                   mutation_strength, current_gen, score]
         Logger.genetic_table.loc[len(Logger.genetic_table)] = to_add
-        # Logger.genetic_table.append(dict(zip(Logger.genetic_table.columns, to_add)), ignore_index=True)
 
     @staticmethod
     def write_to_log():

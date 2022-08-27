@@ -203,6 +203,7 @@ def generate_defend_features(game_state, features):
     features["attacker's_kozers"] = kozers_on_board(game_state, True) #is it good though? I'm afraid it will prompt a
     # move that will make the attacker attack me with more kozers.. it's nice when the enemy gets rid of kozers, but
     # it's better when he doesn't attck me with them
+    features["variance_rank_on_board"] = -np.var([card.rank for card in game_state.cards_on_board])
 
 
 def generate_hand_features(game_state, hand, op_hand, features):
@@ -213,7 +214,7 @@ def generate_hand_features(game_state, hand, op_hand, features):
     features["num of cards"] = -len(hand) / deck_amount
     features["difference between hands"] = (len(op_hand) - len(hand)) / deck_amount
     features["mean_rank"] = card_ranks.multiply_key_value() / cards_amount
-    features["variance_rank"] = sum((features["mean_rank"] - card.rank) ** 2 for card in hand) / cards_amount
+    # features["variance_rank"] = sum((features["mean_rank"] - card.rank) ** 2 for card in hand) / cards_amount
     features["variance_suit"] = card_suits.var()
     features["min_card"] = 15 if len(hand) == 0 else hand[-1].rank
     features["max_card"] = 15 if len(hand) == 0 else hand[0].rank
@@ -224,16 +225,15 @@ def generate_hand_features(game_state, hand, op_hand, features):
 
 def calculate_weights(weights, mult = 1):
     # hand features
-    # weights["kozer amount"] = 12 * mult
-    # weights["num of cards"] = 20 * mult
+    weights["kozer amount"] = 12 * mult
+    weights["num of cards"] = 20 * mult
     weights["difference between hands"] = 1 * mult #15
-    # weights["mean_rank"] = 3 * mult
-    # # weights["variance_rank"] = 2 * mult
-    # weights["variance_suit"] = 7 * mult
-    # weights["min_card"] = 10 * mult
-    # weights["max_card"] = 3 * mult
-    # weights["cards_on_hand"] = 45 * mult
-    # # weights["hand_sum"] = 1 * mult
+    weights["mean_rank"] = 3 * mult
+    weights["variance_suit"] = 7 * mult
+    weights["min_card"] = 10 * mult
+    weights["max_card"] = 3 * mult
+    weights["cards_on_hand"] = 45 * mult
+    weights["hand_sum"] = 1 * mult
 
     # attacker features
     # weights["kozers_percentage"] = 0 * mult #useless?
@@ -242,12 +242,15 @@ def calculate_weights(weights, mult = 1):
     weights["highs_percentage"] = 1 * mult #1 priority
     weights["defender's_highs"] = 3 * mult
     weights["attacker's_highs"] = 1 * mult #1 priority
-    weights["high_threesomes"] = 1 * mult
+    weights["high_threesomes"] = 2 * mult
 
     # defender features
+    weights["variance_rank_on_board"] = 10 * mult
+
 
 
 def base_evaluation(game_state):
+    pygame.event.pump()
     features = Counter()
     if game_state.is_attacking(0):
         hand, op_hand = game_state.attacker.hand, game_state.defender.hand
