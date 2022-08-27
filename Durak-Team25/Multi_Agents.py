@@ -196,11 +196,11 @@ def generate_attack_features(game_state, features):
 
 
 def generate_defend_features(game_state, features):
-    features["kozers_percentage"] = -kozer_percentage(game_state) #1: i'm still not sure if it's good or bad for the
-    # defender, probably useless.. 2: on second thought, it's better for me as the defender not to have kozers on the board
-    features["defender's_kozers"] = -kozers_on_board(game_state, False) #as the defender, i don't want to get rid of
-    # kozers MORE THAN I HAVE TO. need to think about it, it depends on the kozer and on the amount of cards on board..
-    features["attacker's_kozers"] = kozers_on_board(game_state, True) #is it good though? I'm afraid it will prompt a
+    # features["kozers_percentage"] = -kozer_percentage(game_state) #1: i'm still not sure if it's good or bad for the
+    # # defender, probably useless.. 2: on second thought, it's better for me as the defender not to have kozers on the board
+    # features["defender's_kozers"] = -kozers_on_board(game_state, False) #as the defender, i don't want to get rid of
+    # # kozers MORE THAN I HAVE TO. need to think about it, it depends on the kozer and on the amount of cards on board..
+    # features["attacker's_kozers"] = kozers_on_board(game_state, True) #is it good though? I'm afraid it will prompt a
     # move that will make the attacker attack me with more kozers.. it's nice when the enemy gets rid of kozers, but
     # it's better when he doesn't attck me with them
     features["variance_rank_on_board"] = -np.var([card.rank for card in game_state.cards_on_board])
@@ -226,8 +226,8 @@ def generate_hand_features(game_state, hand, op_hand, features):
 def calculate_weights(weights, mult = 1):
     # hand features
     weights["kozer amount"] = 12 * mult
-    weights["num of cards"] = 20 * mult
-    weights["difference between hands"] = 1 * mult #15
+    weights["num of cards"] = 40 * mult
+    weights["difference between hands"] = 15 * mult #15
     weights["mean_rank"] = 3 * mult
     weights["variance_suit"] = 7 * mult
     weights["min_card"] = 10 * mult
@@ -274,6 +274,7 @@ def base_evaluation(game_state):
 
 
 def genetic_evaluation(game_state, weights):
+    pygame.event.pump()
     features = Counter()
     if game_state.is_attacking(0):
         hand, op_hand = game_state.attacker.hand, game_state.defender.hand

@@ -32,6 +32,7 @@ class GameState:
                 self.back_image.get_rect().size[
                     1] // 2)  # todo: why does this line happen 2 times? once here and once in Deck.py?
         self.show_card_size = False
+        self.known_cards = set()
 
     @property
     def done(self):
@@ -218,6 +219,7 @@ class GameState:
     def _clear_board(self, move_to_beta: bool = False):
         if move_to_beta:
             self.deck.add_to_beta(self.cards_on_board)
+        self.known_cards.update(set(self.cards_on_board))
         self.card_in_play = None
         self.cards_on_board.clear()
 
@@ -271,9 +273,11 @@ class GameState:
         new_deck = self.deck.copy()
         attacker = self.attacker.copy()
         defender = self.defender.copy()
+        known_cards = set([card.copy() for card in self.known_cards])
         successor = GameState(deck=new_deck, done=self._done, attacker=attacker,
                               defender=defender, card_in_play=copy.copy(self.card_in_play),
                               cards_on_board=copy.copy(self.cards_on_board))
+        successor.known_cards = known_cards
         if agent_index == 0:
             successor.apply_agent_actions(action)
         elif agent_index == 1:

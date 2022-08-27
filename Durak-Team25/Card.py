@@ -64,3 +64,6 @@ class Card(pygame.sprite.Sprite):
         new_card.front_image = self.front_image.copy()
         new_card.current_image = self.current_image.copy()
         return new_card
+
+    def __hash__(self):
+        return hash(str(self))
