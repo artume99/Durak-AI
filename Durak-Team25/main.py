@@ -109,39 +109,21 @@ def create_offsprings(args, parentA, parentB):
 
 def main():
     parser = argparse.ArgumentParser(description='Durak game.')
-    parser.add_argument('--random_seed', help='The seed for the random state.',
-                        default=numpy.random.randint(100),
+    parser.add_argument('--random_seed', help='The seed for the random state.', default=numpy.random.randint(100),
                         type=int)
-    agents = ["KeyboardAgent", 'ExpectimaxAgent', "MinimaxAgent",
-              "AlphaBetaAgent", "GeneticAgent", "RandomOpponentAgent"]
-    parser.add_argument('--agent', choices=agents, help='The agent.',
-                        default=agents[4], type=str)
-    parser.add_argument('--depth',
-                        help='The maximum depth for to search in the game tree.',
-                        default=2, type=int)
-    parser.add_argument('--sleep_between_actions',
-                        help='Should sleep between actions.', default=True,
-                        type=bool)
-    parser.add_argument('--num_of_games', help='The number of games to run.',
-                        default=2, type=int)
-    parser.add_argument('--num_of_generations',
-                        help='The number of generations to run.',
-                        default=3, type=int)
-    parser.add_argument('--num_of_offsprings',
-                        help='The number of offsprings to spawn.',
-                        default=2, type=int)
-    parser.add_argument('--mutation_coef',
-                        help='Chance of a mutation occuring.',
-                        default=0.05, type=int)
-    parser.add_argument('--mutation_strength',
-                        help='Strength of a mutation.',
-                        default=2, type=int)
-    parser.add_argument('--evaluation_function',
-                        help='The evaluation function for ai agent.',
+    agents = ["KeyboardAgent", 'ExpectimaxAgent', "MinimaxAgent", "AlphaBetaAgent", "GeneticAgent",
+              "RandomOpponentAgent"]
+    parser.add_argument('--agent', choices=agents, help='The agent.', default=agents[4], type=str)
+    parser.add_argument('--depth', help='The maximum depth for to search in the game tree.', default=1, type=int)
+    parser.add_argument('--sleep_between_actions', help='Should sleep between actions.', default=False, type=bool)
+    parser.add_argument('--num_of_games', help='The number of games to run.', default=2, type=int)
+    parser.add_argument('--num_of_generations', help='The number of generations to run.', default=3, type=int)
+    parser.add_argument('--num_of_offsprings', help='The number of offsprings to spawn.', default=2, type=int)
+    parser.add_argument('--mutation_coef', help='Chance of a mutation occuring.', default=0.05, type=int)
+    parser.add_argument('--mutation_strength', help='Strength of a mutation.', default=2, type=int)
+    parser.add_argument('--evaluation_function', help='The evaluation function for ai agent.',
                         default='score_evaluation_function', type=str)
-    parser.add_argument('--opponent',
-                        help='Opponent to play against',
-                        default=agents[-1], type=str)
+    parser.add_argument('--opponent', help='Opponent to play against', default=agents[-1], type=str)
 
     args = parser.parse_args()
     numpy.random.seed(args.random_seed)

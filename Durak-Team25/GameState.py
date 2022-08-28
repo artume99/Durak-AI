@@ -213,6 +213,7 @@ class GameState:
         player.hand.remove(card)
         self.cards_on_board.append(card)
 
+
     def _switch_roles(self):
         self.attacker, self.defender = self.defender, self.attacker
 
