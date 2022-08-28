@@ -1,6 +1,7 @@
 import copy
 import os.path
 import pickle
+import sys
 from enum import Enum
 from typing import Tuple, List
 
@@ -25,11 +26,8 @@ from pygame.locals import (
 )
 from Constants import *
 
-
-class AgentNum(Enum):
-    Player = 0
-    Computer = 1
-
+Player = 0
+Computer = 1
 
 class KeyboardAgent(Agent):
     """
@@ -67,14 +65,11 @@ class KeyboardAgent(Agent):
             if event.type == KEYDOWN:
                 if event.key == K_SPACE:
                     card = self.hand[self.selected_card_ind]
-                    self.selected_card_ind = 0
-                    return card
+                    action = card
                 elif event.key == K_DOWN:
-                    self.selected_card_ind = 0
-                    return Action.TAKE
+                    action = Action.TAKE
                 elif event.key == K_UP:
-                    self.selected_card_ind = 0
-                    return Action.BETA
+                    action = Action.BETA
                 elif event.key == K_RIGHT:
                     self.selected_card_ind += 1
                     if self.selected_card_ind >= len(self.hand):
@@ -83,7 +78,7 @@ class KeyboardAgent(Agent):
                     print("currently selected card: ", end="")
                     print(self.hand[self.selected_card_ind])
                     print(MSG_FOR_KEYBOARD_AGENT)
-                    return Action.SWIPE
+                    action = Action.SWIPE
                 elif event.key == K_LEFT:
                     self.selected_card_ind -= 1
                     if self.selected_card_ind < 0:
@@ -91,10 +86,29 @@ class KeyboardAgent(Agent):
                         print("currently selected card: ", end="")
                         print(self.hand[self.selected_card_ind])
                         print(MSG_FOR_KEYBOARD_AGENT)
-                    return Action.SWIPE
+                    action = Action.SWIPE
+                else:
+                    continue
+                if action not in state.get_legal_actions(0) + [Action.SWIPE]:
+                    print(f"Action {action} is Illegal ", file=sys.stderr)
+                    continue
+                if action is not Action.SWIPE:
+                    self.selected_card_ind = 0
+                return action
+            elif event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
 
     def stop_running(self):
         self._should_stop = True
+
+    def copy(self):
+        new_agent = KeyboardAgent()
+        new_hand = []
+        for card in self.hand:
+            new_hand.append(card.copy())
+        new_agent.hand = new_hand
+        return new_agent
 
 
 suits = {
@@ -299,7 +313,7 @@ def calculate_weights(weights, mult=1):
 def base_evaluation(game_state):
     pygame.event.pump()
     features = Counter()
-    if game_state.is_attacking(0):
+    if game_state.is_attacking(Player):
         hand, op_hand = game_state.attacker.hand, game_state.defender.hand
         generate_attack_features(game_state, features)
     else:
@@ -351,10 +365,10 @@ class MultiAgentSearchAgent(Agent):
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
     def get_action(self, game_state: GameState):
-        expectimax = self.expctimax(game_state, self.depth, AgentNum.Player)
+        expectimax = self.expctimax(game_state, self.depth, Player)
         return expectimax[1]
 
-    def expctimax(self, game_state: GameState, depth: int, agent: AgentNum):
+    def expctimax(self, game_state: GameState, depth: int, agent: int):
         # region End Condition
         if depth == 0 or game_state.done:
             return self.evaluation_function(game_state), Action.STOP
@@ -363,27 +377,27 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         costume_key = lambda x: x[0]
 
         # region Expected Max
-        if agent == AgentNum.Player:
-            legal_moves = game_state.get_legal_actions(agent.value)
+        if agent == Player:
+            legal_moves = game_state.get_legal_actions(agent)
             max_val = (float("-inf"), Action.STOP)
             for move in legal_moves:
-                new_state = game_state.generate_successor(agent.value, move)
-                response_val = self.expctimax(new_state, depth - 1, AgentNum.Computer)[0], move
+                new_state = game_state.generate_successor(agent, move)
+                response_val = self.expctimax(new_state, depth - 1, Computer)[0], move
                 max_val = max(max_val, response_val, key=costume_key)
             return max_val
 
         # endregion
 
         # region Expected Min
-        if agent == AgentNum.Computer:
-            legal_moves = game_state.get_legal_actions(agent.value)
+        if agent == Computer:
+            legal_moves = game_state.get_legal_actions(agent)
             succesors = []
             for move in legal_moves:
-                succesors.append(game_state.generate_successor(agent.value, move))
+                succesors.append(game_state.generate_successor(agent, move))
             succesors = np.array(succesors)
             probability_s = 1 / len(succesors)
             vfunc_expectimax = np.vectorize(self.expctimax)
-            responses = vfunc_expectimax(succesors, depth, agent.Player)
+            responses = vfunc_expectimax(succesors, depth, Player)
             expectation = np.sum(responses[0] * probability_s), Action.STOP
             return expectation
 
@@ -401,10 +415,10 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
 
 class MinmaxAgent(MultiAgentSearchAgent):
     def get_action(self, game_state: GameState):
-        minimax = self.minimax(game_state, self.depth, AgentNum.Player)
+        minimax = self.minimax(game_state, self.depth, Player)
         return minimax[1]
 
-    def minimax(self, game_state: GameState, depth: int, agent: AgentNum) -> Tuple[int, Action]:
+    def minimax(self, game_state: GameState, depth: int, agent: int) -> Tuple[int, Action]:
         # region if 𝑑𝑒𝑝𝑡ℎ = 0 or v is a terminal node then return 𝑢(𝑣)
         if depth == 0 or game_state.done:
             return self.evaluation_function(game_state), Action.STOP
@@ -413,24 +427,24 @@ class MinmaxAgent(MultiAgentSearchAgent):
         costume_key = lambda x: x[0]
 
         # region  if isMaxNode then return max
-        if agent == AgentNum.Player:
-            legal_moves = game_state.get_legal_actions(agent.value)
+        if agent == Player:
+            legal_moves = game_state.get_legal_actions(agent)
             max_val = (float("-inf"), Action.STOP)
             for move in legal_moves:
-                new_state = game_state.generate_successor(agent.value, move)
-                response_val = self.minimax(new_state, depth - 1, AgentNum.Computer)[0], move
+                new_state = game_state.generate_successor(agent, move)
+                response_val = self.minimax(new_state, depth - 1, Computer)[0], move
                 max_val = max(max_val, response_val, key=costume_key)
             return max_val
 
         # endregion
 
         # region  if isMinNode then return min
-        if agent == AgentNum.Computer:
-            legal_moves = game_state.get_legal_actions(agent.value)
+        if agent == Computer:
+            legal_moves = game_state.get_legal_actions(agent)
             min_val = (float("inf"), Action.STOP)
             for move in legal_moves:
-                new_state = game_state.generate_successor(agent.value, move)
-                response_val = self.minimax(new_state, depth, AgentNum.Player)[0], move
+                new_state = game_state.generate_successor(agent, move)
+                response_val = self.minimax(new_state, depth, Player)[0], move
                 min_val = min(min_val, response_val, key=costume_key)
             return min_val
         # endregion
@@ -452,7 +466,7 @@ class GeneticAgent(MinmaxAgent):
         self.weight_vector = weight
 
     def minimax(self, game_state: GameState, depth: int,
-                agent: AgentNum) -> Tuple[int, Action]:
+                agent: int) -> Tuple[int, Action]:
         # region if 𝑑𝑒𝑝𝑡ℎ = 0 or v is a terminal node then return 𝑢(𝑣)
         if depth == 0 or game_state.done:
             return self.evaluation_function(game_state, self.weight_vector), Action.STOP
@@ -461,26 +475,26 @@ class GeneticAgent(MinmaxAgent):
         costume_key = lambda x: x[0]
 
         # region  if isMaxNode then return max
-        if agent == AgentNum.Player:
-            legal_moves = game_state.get_legal_actions(agent.value)
+        if agent == Player:
+            legal_moves = game_state.get_legal_actions(agent)
             max_val = (float("-inf"), Action.STOP)
             for move in legal_moves:
-                new_state = game_state.generate_successor(agent.value, move)
-                response_val = self.minimax(new_state, depth - 1, AgentNum.Computer)[0], move
+                new_state = game_state.generate_successor(agent, move)
+                response_val = self.minimax(new_state, depth - 1, Computer)[0], move
                 max_val = max(max_val, response_val, key=costume_key)
             return max_val
 
         # endregion
 
         # region  if isMinNode then return min
-        if agent == AgentNum.Computer:
-            legal_moves = game_state.get_legal_actions(agent.value)
+        if agent ==Computer:
+            legal_moves = game_state.get_legal_actions(agent)
             min_val = (float("inf"), Action.STOP)
             for move in legal_moves:
-                new_state = game_state.generate_successor(agent.value,
+                new_state = game_state.generate_successor(agent,
                                                           move)
                 response_val = \
-                    self.minimax(new_state, depth, AgentNum.Player)[0], move
+                    self.minimax(new_state, depth, Player)[0], move
                 min_val = min(min_val, response_val, key=costume_key)
             return min_val
         # endregion
@@ -498,10 +512,10 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
 
     def get_action(self, game_state: GameState):
 
-        alpha_beta = self.alpha_beta(game_state, AgentNum.Player, self.depth)
+        alpha_beta = self.alpha_beta(game_state, Player, self.depth)
         return alpha_beta[1]
 
-    def alpha_beta(self, game_state: GameState, agent: AgentNum, depth: int, alpha=float("-inf"), beta=float("inf")) -> \
+    def alpha_beta(self, game_state: GameState, agent: int, depth: int, alpha=float("-inf"), beta=float("inf")) -> \
             Tuple[int, Action]:
         # region End Condition
         if depth == 0 or game_state.done:
@@ -511,13 +525,13 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         costume_key = lambda x: x[0]
 
         # region alpha pruning
-        if agent == AgentNum.Player:
-            legal_moves = game_state.get_legal_actions(agent.value)
+        if agent == Player:
+            legal_moves = game_state.get_legal_actions(agent)
             return_alpha = (alpha, Action.STOP)
             for move in legal_moves:
-                new_state = game_state.generate_successor(agent.value, move)
+                new_state = game_state.generate_successor(agent, move)
                 alpha = return_alpha[0]
-                response_val = self.alpha_beta(new_state, AgentNum.Computer, depth - 1, alpha, beta)[0], move
+                response_val = self.alpha_beta(new_state, Computer, depth - 1, alpha, beta)[0], move
                 return_alpha = max(return_alpha, response_val, key=costume_key)
                 if return_alpha[0] >= beta:
                     break
@@ -525,13 +539,13 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         # endregion
 
         # region beta pruning
-        if agent == AgentNum.Computer:
-            legal_moves = game_state.get_legal_actions(agent.value)
+        if agent == Computer:
+            legal_moves = game_state.get_legal_actions(agent)
             return_beta = (beta, Action.STOP)
             for move in legal_moves:
-                new_state = game_state.generate_successor(agent.value, move)
+                new_state = game_state.generate_successor(agent, move)
                 beta = return_beta[0]
-                response_val = self.alpha_beta(new_state, AgentNum.Player, depth, alpha, beta)[0], move
+                response_val = self.alpha_beta(new_state, Player, depth, alpha, beta)[0], move
                 return_beta = min(return_beta, response_val, key=costume_key)
                 if alpha >= return_beta[0]:
                     break
