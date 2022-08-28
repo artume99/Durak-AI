@@ -161,7 +161,7 @@ def kozers_on_board(game_state, attacker: bool):
     return kozer_amount
 
 
-def kozer_percentage(game_state): #todo: check where this function should be, maybe some kind of utils?
+def kozer_percentage(game_state):  # todo: check where this function should be, maybe some kind of utils?
     kozer_amount = 0
     for card in game_state.cards_on_board:
         if card.is_kozer():
@@ -202,8 +202,9 @@ def can_defend(op_card: Card, hand: List[Card]):
 
 def weaknesses_count(game_state, hand, op_hand):
     known_op_hand = game_state.known_cards.intersection(op_hand)
-    weaknesses = len(op_hand) - len(known_op_hand) #first of all, the diff between the cards there are in the op's hand
-    #and the cards that i know of is a weakness
+    weaknesses = len(op_hand) - len(
+        known_op_hand)  # first of all, the diff between the cards there are in the op's hand
+    # and the cards that i know of is a weakness
     for card in known_op_hand:
         if not can_defend(card, hand):
             weaknesses += 1
@@ -212,13 +213,15 @@ def weaknesses_count(game_state, hand, op_hand):
 
 def generate_attack_features(game_state, features):
     features["kozers percentage"] = -kozer_percentage(game_state)
-    features["defender's kozers"] = kozers_on_board(game_state, False) #as the attacker, it is good for me if the enemy
+    features["defender's kozers"] = kozers_on_board(game_state,
+                                                    False)  # as the attacker, it is good for me if the enemy
     # gets rid of kozers
     features["attacker's kozers"] = -kozers_on_board(game_state, True)
     features["highs percentage"] = -highs_percentage(game_state)
     features["defender's highs"] = highs_on_board(game_state, False)
     features["attacker's highs"] = -highs_on_board(game_state, True)
-    features["high triplets on board"] = -1 if high_triplets(game_state) else 1 #letting the defender hold onto a triplet
+    features["high triplets on board"] = -1 if high_triplets(
+        game_state) else 1  # letting the defender hold onto a triplet
     # is far worse than bita
 
 
@@ -232,7 +235,8 @@ def generate_defend_features(game_state, hand, op_hand, features):
     # it's better when he doesn't attck me with them
 
     # todo: add a feature that takes in count the amount of high triplets: on board + in hand (keep it with low weight)
-    features["variance rank on board"] = -np.var([card.rank for card in game_state.cards_on_board])
+    features["variance rank on board"] = 0 if not game_state.cards_on_board else -np.var(
+        [card.rank for card in game_state.cards_on_board])
     features["vulnerability"] = -weaknesses_count(game_state, hand, op_hand)
 
 
@@ -248,7 +252,7 @@ def generate_hand_features(game_state, hand, op_hand, features):
     min_card = None if len(hand) == 0 else hand[-1]
     if min_card:
         features["min card"] = min_card.rank + 6 if min_card.is_kozer() else min_card.rank
-    features["high triplets in hand"] = 0 #todo
+    features["high triplets in hand"] = 0  # todo
     if len(game_state.deck) < 6:
         features["cards on hand"] = -cards_amount / (36 * (len(game_state.deck) + 1))
         features["last hand"] = 1 if len(hand) == 0 else 0
@@ -274,9 +278,9 @@ def calculate_weights(weights, mult=1):
     weights["mean rank"] = 3 * mult
     weights["variance suit"] = 7 * mult
     weights["min card"] = 10 * mult
-    weights["high triplets in hand"] = 0 * mult #todo
+    weights["high triplets in hand"] = 0 * mult  # todo
     weights["cards on hand"] = 45 * mult
-    weights["last hand"] = 10000 * mult #"inf" is not good! it evaluates the actions as "nan" and gives "STOP" action!
+    weights["last hand"] = 10000 * mult  # "inf" is not good! it evaluates the actions as "nan" and gives "STOP" action!
 
     # attacker features
     # weights["kozers percentage"] = 0 * mult #useless?
@@ -476,7 +480,7 @@ class GeneticAgent(MinmaxAgent):
                 new_state = game_state.generate_successor(agent.value,
                                                           move)
                 response_val = \
-                self.minimax(new_state, depth, AgentNum.Player)[0], move
+                    self.minimax(new_state, depth, AgentNum.Player)[0], move
                 min_val = min(min_val, response_val, key=costume_key)
             return min_val
         # endregion
