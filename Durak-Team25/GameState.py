@@ -53,7 +53,7 @@ class GameState:
     def draw_players(self, screen):
         players = [self.attacker, self.defender]
         for p in players:
-            if type(p) is not GameState.Opponent:
+            if type(p) is not self.Opponent:
                 user_cards_x = SCREEN_WIDTH // 4
                 user_cards_x_end = SCREEN_WIDTH - SCREEN_WIDTH // 4
                 user_cards_gap = (user_cards_x_end - user_cards_x) / (len(p.hand) + 1)
@@ -115,13 +115,13 @@ class GameState:
         Checks the type of the player (attack, defend) and returns it's actions
         :return:
         """
-        if type(self.attacker) is GameState.Opponent:
+        if type(self.attacker) is self.Opponent:
             return self.apply_defend_action(action)
         else:
             return self.apply_attack_action(action)
 
     def apply_opponent_action(self, action):
-        if type(self.attacker) is GameState.Opponent:
+        if type(self.attacker) is self.Opponent:
             self.apply_attack_action(action)
         else:
             return self.apply_defend_action(action)
@@ -131,7 +131,7 @@ class GameState:
         Checks the type of the opponent (attack, defend) and returns it's actions
         :return:
         """
-        if type(self.attacker) is GameState.Opponent:
+        if type(self.attacker) is self.Opponent:
             return self.attacking_actions()
         else:
             return self.defending_actions()
@@ -180,7 +180,7 @@ class GameState:
         Checks the type of the player (attack, defend) and returns it's actions
         :return:
         """
-        if type(self.attacker) is GameState.Opponent:
+        if type(self.attacker) is self.Opponent:
             return self.defending_actions()
         else:
             return self.attacking_actions()
@@ -212,7 +212,6 @@ class GameState:
     def place_card(self, player, card):
         player.hand.remove(card)
         self.cards_on_board.append(card)
-
 
     def _switch_roles(self):
         self.attacker, self.defender = self.defender, self.attacker
@@ -260,9 +259,9 @@ class GameState:
 
     def is_attacking(self, index):
         if index == 0:
-            return type(self.attacker) is not GameState.Opponent
+            return type(self.attacker) is not self.Opponent
         else:
-            return type(self.attacker) is GameState.Opponent
+            return type(self.attacker) is self.Opponent
 
     def generate_successor(self, agent_index, action):
         """
@@ -279,6 +278,7 @@ class GameState:
                               defender=defender, card_in_play=copy.copy(self.card_in_play),
                               cards_on_board=copy.copy(self.cards_on_board))
         successor.known_cards = known_cards
+        successor.Opponent = self.Opponent
         if agent_index == 0:
             successor.apply_agent_actions(action)
         elif agent_index == 1:

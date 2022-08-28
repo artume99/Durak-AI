@@ -1,5 +1,7 @@
 import argparse
+import sys
 
+import Multi_Agents
 from Logger import Logger
 import numpy
 import pygame
@@ -30,6 +32,7 @@ class GameRunner(object):
         initial_state.reshuffle()
         op_hand = initial_state.deck.hand_out_cards(6)
         opponent_agent = create_opponent(args)
+        initial_state.Opponent = type(opponent_agent)
         opponent_agent.hand = op_hand
         ag_hand = initial_state.deck.hand_out_cards(6)
         self._agent.hand = []
@@ -113,8 +116,8 @@ def main():
                         type=int)
     agents = ["KeyboardAgent", 'ExpectimaxAgent', "MinimaxAgent", "AlphaBetaAgent", "GeneticAgent",
               "RandomOpponentAgent"]
-    parser.add_argument('--agent', choices=agents, help='The agent.', default=agents[4], type=str)
-    parser.add_argument('--depth', help='The maximum depth for to search in the game tree.', default=1, type=int)
+    parser.add_argument('--agent', choices=agents, help='The agent.', default=agents[1], type=str)
+    parser.add_argument('--depth', help='The maximum depth for to search in the game tree.', default=2, type=int)
     parser.add_argument('--sleep_between_actions', help='Should sleep between actions.', default=False, type=bool)
     parser.add_argument('--num_of_games', help='The number of games to run.', default=2, type=int)
     parser.add_argument('--num_of_generations', help='The number of generations to run.', default=3, type=int)
@@ -127,6 +130,18 @@ def main():
 
     args = parser.parse_args()
     numpy.random.seed(args.random_seed)
+
+    # If keyboard Agent is playing, than the other player is AI/Random, changing to the right stats
+    if args.agent == "KeyboardAgent":
+        Multi_Agents.Player = 1
+        Multi_Agents.Computer = 0
+    else:
+        Multi_Agents.Player = 0
+        Multi_Agents.Computer = 1
+
+    if args.agent != "KeyboardAgent" and args.opponent != "RandomOpponentAgent":
+        print("Only keyboard is allowed against AI currently", file=sys.stderr)
+        exit(1)
 
     if args.agent == "GeneticAgent":
         parentA, parentB = Counter(), Counter()
@@ -183,7 +198,7 @@ def run_games(args, agent):
     for i in range(args.num_of_games):
         Logger.info(f"Game #{i + 1}")
         looser = game_runner.new_game(initial_state, args)
-        if type(looser) is RandomOpponentAgent:
+        if type(looser) is initial_state.Opponent:
             won_games += 1
         Logger.info(f"looser is {looser}")
         print("looser is ", looser)

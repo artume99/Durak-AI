@@ -143,6 +143,10 @@ class Game:
         self._state.defender = defender
 
         while not self._state.done and not self._should_quit:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    exit()
             pygame.event.pump()
             self.set_background()
             self._state.render(self.screen)
