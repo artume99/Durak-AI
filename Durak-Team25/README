@@ -1,0 +1,10 @@
+Hello!
+This is an AI project by: Yam Fine, Artume Pichersky, Miryam Yakubov, Nadav Finkel
+
+We have implemented MiniMax algorithms (AlphaBetPruning, ExpectiMax, Minimax) along side with Gentic
+Algorithm.
+There are quiet a few parameters to play around with, feel free to explore them with -h.
+
+Here are some execution options:
+1. Play against AI : --opponent ExpectimaxAgent --depth 2
+2. Explore AI work : --agent ExpectimaxAgent --dpeth 2
