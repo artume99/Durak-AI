@@ -102,6 +102,9 @@ class GameState:
     def reshuffle(self):
         self.deck.build()
 
+    def is_suit_kozer(self, suit):
+        return suit == self.deck.kozer
+
     def get_legal_actions(self, agent_index):
         if agent_index == 0:
             return self.get_agent_legal_actions()

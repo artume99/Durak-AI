@@ -113,10 +113,10 @@ def main():
                         type=int)
     agents = ["KeyboardAgent", 'ExpectimaxAgent', "MinimaxAgent", "AlphaBetaAgent", "GeneticAgent",
               "RandomOpponentAgent"]
-    parser.add_argument('--agent', choices=agents, help='The agent.', default=agents[4], type=str)
+    parser.add_argument('--agent', choices=agents, help='The agent.', default=agents[3], type=str)
     parser.add_argument('--depth', help='The maximum depth for to search in the game tree.', default=1, type=int)
     parser.add_argument('--sleep_between_actions', help='Should sleep between actions.', default=False, type=bool)
-    parser.add_argument('--num_of_games', help='The number of games to run.', default=2, type=int)
+    parser.add_argument('--num_of_games', help='The number of games to run.', default=20, type=int)
     parser.add_argument('--num_of_generations', help='The number of generations to run.', default=3, type=int)
     parser.add_argument('--num_of_offsprings', help='The number of offsprings to spawn.', default=2, type=int)
     parser.add_argument('--mutation_coef', help='Chance of a mutation occuring.', default=0.05, type=int)
@@ -186,7 +186,7 @@ def run_games(args, agent):
         if type(looser) is RandomOpponentAgent:
             won_games += 1
         Logger.info(f"looser is {looser}")
-        print("looser is ", looser)
+        print(f"at game number: {i + 1} the looser is: {looser}")
 
     Logger.info(f"You won {won_games}/{args.num_of_games} games ")
     print(f"You won {won_games}/{args.num_of_games} games ")
