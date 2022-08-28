@@ -122,6 +122,8 @@ class GameState:
 
     def apply_opponent_action(self, action):
         if type(self.attacker) is GameState.Opponent:
+            if action == Action.STOP:
+                x=0
             self.apply_attack_action(action)
         else:
             return self.apply_defend_action(action)
@@ -191,6 +193,8 @@ class GameState:
             self._clear_board(True)
             self._switch_roles()
         else:  # Place card
+            if action == Action.STOP:
+                x=8
             self.card_in_play = action
             self.place_card(self.attacker, action)
         self._check_looser()
@@ -206,12 +210,17 @@ class GameState:
             self._replenish_cards(self.attacker)
             self._clear_board()
         else:  # Place card
+            if action == Action.STOP:
+                x=7
             self.place_card(self.defender, action)
         self._check_looser()
 
     def place_card(self, player, card):
+        if type(card) is Action:
+            print("bad news")
         player.hand.remove(card)
         self.cards_on_board.append(card)
+        x=6
 
     def _switch_roles(self):
         self.attacker, self.defender = self.defender, self.attacker

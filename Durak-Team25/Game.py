@@ -25,9 +25,6 @@ class Agent(object):
     def __init__(self, initial_cards: List = []):
         super(Agent, self).__init__()
         self.hand = initial_cards
-        self.op_hand = set()
-        self.possible_deck = set() #should contain ALL cards, then substruct the cards i'm holding and then, as soon as
-        # i know the op_hand - substruct it, too
         self.selected_card_ind = 0
 
     @abc.abstractmethod
@@ -42,11 +39,6 @@ class Agent(object):
     def extend_hand(self, cards):
         self.hand.extend(cards)
         self.hand.sort()
-
-    def extend_op_hand(self, cards): #todo: check how to make it work
-        for card in cards:
-            self.op_hand.add(card)
-            self.possible_deck.remove(card)
 
     def stop_running(self):
         pass
