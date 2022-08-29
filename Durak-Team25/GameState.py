@@ -205,7 +205,6 @@ class GameState:
             self._switch_roles()
         elif action is Action.TAKE:
             self.defender.extend_hand(self.cards_on_board)
-            # self.attacker.extend_op_hand(self.cards_on_board) #todo: make it work
             self._replenish_cards(self.attacker)
             self._clear_board()
         else:  # Place card

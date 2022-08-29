@@ -331,7 +331,7 @@ def generate_hand_features(game_state: GameState, hand: List[Card], op_hand: Lis
     deck_amount = max(len(game_state.deck), 1)
     cards_amount = max(len(hand), 1)
     card_ranks, card_suits = get_hand_dicts(hand)
-    min_card = None if len(hand) == 0 else hand[-1]
+    min_card = None if len(hand) == 0 else min(hand)
     features["kozer amount"] = card_suits[suits[game_state.deck.kozer]]
     features["highs amount"] = highs_in_hand(hand)
     features["num of cards"] = -len(hand) / deck_amount
@@ -453,7 +453,6 @@ def base_evaluation(game_state: GameState):
         final[feature] = (weights[feature] * features[feature])
     print("\n\n")
     print(features)
-    print()
     print(final)
     return score
 
@@ -509,7 +508,6 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
                 new_state = game_state.generate_successor(agent, move)
                 response_val = self.expctimax(new_state, depth - 1, Computer)[0], move
                 print(move, response_val)
-                print()
                 max_val = max(max_val, response_val, key=costume_key)
             return max_val
 
