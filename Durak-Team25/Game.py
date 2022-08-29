@@ -62,7 +62,6 @@ class RandomOpponentAgent(Agent):
     #     action = np.random.choice(legal_actions, 1, p=weights/np.sum(weights))[0]
     #     return action
 
-
     # Random op with tendency to choose the smallest card, if possible
     def get_action(self, game_state):
         card_actions = []

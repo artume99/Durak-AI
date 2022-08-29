@@ -149,7 +149,21 @@ def rank_on_board(game_state: GameState, card_rank: int):
     return cards_amount
 
 
-def high_triplets(game_state: GameState):
+def rank_in_hand(hand: List[Card], card_rank: int):
+    """
+    Calculates how many cards of a certain rank there are currently in hand
+    :param hand: Holding hand
+    :param card_rank: The desired rank
+    :return: int
+    """
+    cards_amount = 0
+    for card in hand:
+        if card.rank == card_rank:
+            cards_amount += 1
+    return cards_amount
+
+
+def high_triplets_board(game_state: GameState):
     """
     Is there a triplet of high card on the board?
     :param game_state: The current game state
@@ -157,6 +171,18 @@ def high_triplets(game_state: GameState):
     """
     for rank in HIGH_CARDS:
         if rank_on_board(game_state, rank) >= 3:
+            return True
+    return False
+
+
+def high_triplets_hand(hand: List[Card]):
+    """
+    Is there a triplet of high card in hand?
+    :param hand: Holding hand
+    :return: True if there is at least one triplet of high cards, False o.w.
+    """
+    for rank in HIGH_CARDS:
+        if rank_in_hand(hand, rank) >= 3:
             return True
     return False
 
@@ -340,7 +366,7 @@ def generate_hand_features(game_state: GameState, hand: List[Card], op_hand: Lis
     features["variance suit"] = card_suits.var()
     if min_card:
         features["min card"] = min_card.rank + 6 if min_card.is_kozer() else min_card.rank
-    features["high triplets in hand"] = 0  # todo
+    features["high triplets in hand"] = 1 if high_triplets_hand(hand) else 0
     if len(game_state.deck) < 6:
         features["cards on hand"] = -cards_amount / (36 * (len(game_state.deck) + 1))
         features["last turn"] = 1 if len(hand) == 0 else 0
@@ -359,10 +385,10 @@ def generate_attack_features(game_state: GameState, features: Counter):
     features["defender's kozers"] = individual_kozers_on_board(game_state, False)  # as the attacker, it is good for me
     # if the enemy gets rid of kozers
     features["attacker's kozers"] = -individual_kozers_on_board(game_state, True)
-    features["highs percentage"] = -highs_percentage(game_state)
+    # features["highs percentage"] = -highs_percentage(game_state)
     features["defender's highs"] = individual_highs_on_board(game_state, False)
     features["attacker's highs"] = -individual_highs_on_board(game_state, True)
-    features["high triplets on board"] = -1 if high_triplets(game_state) else 1  # letting the defender hold onto a
+    features["high triplets on board"] = -1 if high_triplets_board(game_state) else 1  # letting the defender hold onto a
     # triplet is far worse than bita
 
 
@@ -404,23 +430,21 @@ def calculate_random_weights(weights: Counter):
 
 def calculate_weights(weights, mult=1):
     # hand features
-    weights["kozer amount"] = 20 * mult
+    weights["kozer amount"] = 50 * mult
     weights["highs amount"] = 10 * mult
     weights["num of cards"] = 100 * mult
     weights["difference between hands"] = 15 * mult
     weights["mean rank"] = 2 * mult
     weights["variance suit"] = 7 * mult
-    weights["min card"] = 10 * mult
-    weights["high triplets in hand"] = 0 * mult  # todo
+    weights["min card"] = 90 * mult
+    weights["high triplets in hand"] = 10 * mult
     weights["cards on hand"] = 45 * mult
     weights["last turn"] = 10000 * mult  # "inf" is not good! it evaluates the actions as "nan" and gives "STOP" action!
 
     # attacker features
-    weights["kozers percentage"] = 0 * mult #todo: useless?
-    weights["lows on board"] = 0 * mult
+    weights["lows on board"] = 15 * mult
     weights["defender's kozers"] = 0 * mult
     weights["attacker's kozers"] = 10 * mult
-    weights["highs percentage"] = 0 * mult
     weights["defender's highs"] = 0 * mult
     weights["attacker's highs"] = 0 * mult
     weights["high triplets on board"] = 0 * mult
@@ -451,9 +475,9 @@ def base_evaluation(game_state: GameState):
     for feature in features.keys():
         score += (weights[feature] * features[feature])
         final[feature] = (weights[feature] * features[feature])
-    print("\n\n")
-    print(features)
-    print(final)
+    # print("\n\n")
+    # print(features)
+    # print(final)
     return score
 
 
@@ -507,7 +531,7 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
             for move in legal_moves:
                 new_state = game_state.generate_successor(agent, move)
                 response_val = self.expctimax(new_state, depth - 1, Computer)[0], move
-                print(move, response_val)
+                # print(move, response_val)
                 max_val = max(max_val, response_val, key=costume_key)
             return max_val
 
