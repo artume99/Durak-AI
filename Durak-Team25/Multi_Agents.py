@@ -440,8 +440,8 @@ def calculate_random_weights(weights: Counter):
 def calculate_weights(weights, mult=1):
     # hand features
     weights["kozer amount"] = 25 * mult
-    weights["highs amount"] = 20 * mult
-    weights["num of cards"] = 15 * mult
+    weights["highs amount"] = 25 * mult
+    weights["num of cards"] = 50 * mult
     weights["difference between hands"] = 15 * mult
     weights["mean rank"] = 5 * mult
     weights["variance suit"] = 7 * mult
@@ -451,17 +451,17 @@ def calculate_weights(weights, mult=1):
     weights["last turn"] = 10000 * mult  # "inf" is not good! it evaluates the actions as "nan" and gives "STOP" action!
 
     # attacker features
-    weights["lows on board"] = 15 * mult
-    weights["defender's kozers"] = 18 * mult
-    weights["attacker's kozers"] = 8 * mult
-    weights["defender's highs"] = 18 * mult
-    weights["attacker's highs"] = 8 * mult
-    weights["high triplets on board"] = 10 * mult
-
-    # defender features
-    weights["variance rank on board"] = 30 * mult
-    weights["vulnerability"] = 20 * mult
-    weights["num of attacks rate"] = 15 * mult
+    # weights["lows on board"] = 50 * mult
+    # weights["defender's kozers"] = 12 * mult
+    # weights["attacker's kozers"] = 8 * mult
+    # weights["defender's highs"] = 12 * mult
+    # weights["attacker's highs"] = 8 * mult
+    # weights["high triplets on board"] = 10 * mult
+    #
+    # # defender features
+    # weights["variance rank on board"] = 30 * mult
+    # weights["vulnerability"] = 20 * mult
+    # weights["num of attacks rate"] = 15 * mult
 
 
 def base_evaluation(game_state: GameState):
