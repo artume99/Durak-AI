@@ -5,7 +5,7 @@ import pygame
 from Constants import *
 from Card import Card
 
-suits = ['Spades', 'Hearts', 'Diamonds', 'Clubs']
+
 ranks = list(range(6, 15))  # not supposed to use 2-5 ranked cards
 
 
@@ -15,9 +15,6 @@ class Deck:
     """
 
     def __init__(self, card_list=None, beta_card=None, kozer=None, top_card=None, build=True):
-        # self.suits = ['♠', '♥', '♦', '♣']
-        # self.opened_cards = []
-        # self.tossed_cards = []  # cards that have been deleted from the game
         if beta_card is None:
             beta_card = []
         if card_list is None:
@@ -38,7 +35,7 @@ class Deck:
 
     def build(self):
         self.cards_list, self.beta_cards = [], []
-        for s in suits:
+        for s in SUITS:
             for r in ranks:
                 self.cards_list.append(Card(r, s))
         self.shuffle()
