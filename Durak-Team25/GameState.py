@@ -72,7 +72,7 @@ class GameState:
                 user_cards_y_end = SCREEN_HEIGHT - SCREEN_HEIGHT // 4
                 user_cards_gap = (user_cards_y_end - user_cards_y) / (len(p.hand) + 1)
                 for i, c in enumerate(p.hand):
-                    temp_card = c.back_image
+                    temp_card = c.front_image
                     temp_card = pygame.transform.rotate(temp_card, 90)
                     temp_card_width = 0
                     screen.blit(temp_card, (-((temp_card_width * 2) // 3),

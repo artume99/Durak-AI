@@ -167,17 +167,13 @@ def individual_highs_on_board(game_state: GameState, attacker: bool):
     :param attacker: Do we search for the attacker's highs, or the defender's highs?
     :return: int
     """
-    on_board_amount = len(game_state.cards_on_board)
-    highs_amount = 0
-    if attacker:
-        for i in range((on_board_amount // 2) + 1):
-            if game_state.cards_on_board[i * 2].rank in HIGH_CARDS:
-                highs_amount += 1
-    else:
-        for i in range(on_board_amount // 2):
-            if game_state.cards_on_board[i * 2 + 1].rank in HIGH_CARDS:
-                highs_amount += 1
-    return highs_amount
+    highs = 0
+    for i in range(len(game_state.cards_on_board)):
+        if attacker and i % 2 == 0 and game_state.cards_on_board[i].rank in HIGH_CARDS:
+            highs += 1
+        elif not attacker and i % 2 == 1 and game_state.cards_on_board[i].rank in HIGH_CARDS:
+            highs += 1
+    return highs
 
 
 def highs_percentage(game_state: GameState):
@@ -190,6 +186,16 @@ def highs_percentage(game_state: GameState):
     highs_amount += individual_highs_on_board(game_state, True)
     highs_amount += individual_highs_on_board(game_state, False)
     return highs_amount / len(game_state.cards_on_board)
+
+
+def individual_lows_on_board(game_state: GameState, attacker: bool):
+    lows = 0
+    for i in range(len(game_state.cards_on_board)):
+        if attacker and i % 2 == 0 and game_state.cards_on_board[i].rank in LOW_CARDS:
+            lows += 1
+        elif not attacker and i % 2 == 1 and game_state.cards_on_board[i].rank in LOW_CARDS:
+            lows += 1
+    return lows
 
 
 def highs_in_hand(hand: List[Card]):
@@ -207,17 +213,13 @@ def individual_kozers_on_board(game_state: GameState, attacker: bool):
     :param attacker: Do we search for the attacker's kozers, or the defender's kozers?
     :return: int
     """
-    on_board_amount = len(game_state.cards_on_board)
-    kozer_amount = 0
-    if attacker:
-        for i in range((on_board_amount // 2) + 1):
-            if game_state.cards_on_board[i * 2].is_kozer():
-                kozer_amount += 1
-    else:
-        for i in range(on_board_amount // 2):
-            if game_state.cards_on_board[i * 2 + 1].is_kozer():
-                kozer_amount += 1
-    return kozer_amount
+    kozers = 0
+    for i in range(len(game_state.cards_on_board)):
+        if attacker and i % 2 == 0 and game_state.cards_on_board[i].is_kozer():
+            kozers += 1
+        elif not attacker and i % 2 == 1 and game_state.cards_on_board[i].is_kozer():
+            kozers += 1
+    return kozers
 
 
 def kozer_percentage(game_state: GameState):
@@ -349,9 +351,12 @@ def generate_attack_features(game_state: GameState, features: Counter):
     :param game_state: The current game state
     :param features: A features dict
     """
-    features["kozers percentage"] = -kozer_percentage(game_state)
-    features["defender's kozers"] = individual_kozers_on_board(game_state, False)  # as the attacker, it is good for me if the
-    # enemy gets rid of kozers
+    deck_amount = max(len(game_state.deck), 1)
+    # features["kozers percentage"] = -kozer_percentage(game_state)
+    features["lows on board"] = -individual_lows_on_board(game_state, True) / deck_amount # we prefer NOT to attack with
+    # lows as the game proceeds
+    features["defender's kozers"] = individual_kozers_on_board(game_state, False)  # as the attacker, it is good for me
+    # if the enemy gets rid of kozers
     features["attacker's kozers"] = -individual_kozers_on_board(game_state, True)
     features["highs percentage"] = -highs_percentage(game_state)
     features["defender's highs"] = individual_highs_on_board(game_state, False)
@@ -370,9 +375,10 @@ def generate_defend_features(game_state: GameState, hand: List[Card], op_hand: L
     """
     cards_on_board = len(game_state.cards_on_board)
     # todo: add a feature that takes in count the amount of high triplets: on board + in hand (keep it with low weight)
-    features["variance rank on board"] = 0 if not game_state.cards_on_board else -np.var([card.rank for card in game_state.cards_on_board])
+    # features["variance rank on board"] = 0 if not game_state.cards_on_board else\
+    #     -np.var([card.rank for card in game_state.cards_on_board]) #todo: remind me why do we need a variaty of ranks??
     features["vulnerability"] = -weaknesses_count(game_state, hand, op_hand)
-    features["num of attacks rate"] = -math.pow(cards_on_board - 4, 2) #2 attcks are good for us, we get rid of
+    features["num of attacks rate"] = -math.pow(cards_on_board - 4, 2) #2 attacks are good for us, we get rid of
     # cards, but the more attacks there are - the bigger the chance we take everything
 
 
@@ -396,10 +402,10 @@ def calculate_weights(weights: Counter, mult=1):
     """
     # hand features
     weights["kozer amount"] = 20 * mult
-    weights["highs amount"] = 15 * mult
-    weights["num of cards"] = 40 * mult
+    weights["highs amount"] = 10 * mult
+    weights["num of cards"] = 100 * mult
     weights["difference between hands"] = 15 * mult
-    weights["mean rank"] = 3 * mult
+    weights["mean rank"] = 2 * mult
     weights["variance suit"] = 7 * mult
     weights["min card"] = 10 * mult
     weights["high triplets in hand"] = 0 * mult  # todo
@@ -407,16 +413,17 @@ def calculate_weights(weights: Counter, mult=1):
     weights["last turn"] = 10000 * mult  # "inf" is not good! it evaluates the actions as "nan" and gives "STOP" action!
 
     # attacker features
-    weights["kozers percentage"] = 0 * mult #useless?
-    weights["defender's kozers"] = 1 * mult
-    weights["attacker's kozers"] = 3 * mult
-    weights["highs percentage"] = 1 * mult
-    weights["defender's highs"] = 3 * mult
-    weights["attacker's highs"] = 1 * mult
-    weights["high triplets on board"] = 2 * mult
+    weights["kozers percentage"] = 0 * mult #todo: useless?
+    weights["lows on board"] = 0 * mult
+    weights["defender's kozers"] = 0 * mult
+    weights["attacker's kozers"] = 10 * mult
+    weights["highs percentage"] = 0 * mult
+    weights["defender's highs"] = 0 * mult
+    weights["attacker's highs"] = 0 * mult
+    weights["high triplets on board"] = 0 * mult
 
     # defender features
-    weights["variance rank on board"] = 10 * mult
+    weights["variance rank on board"] = 2 * mult #todo: remind me why do we need a variaty of ranks??
     weights["vulnerability"] = 10 * mult
     weights["num of attacks rate"] = 10 * mult
 
@@ -441,6 +448,10 @@ def base_evaluation(game_state: GameState):
     for feature in features.keys():
         score += (weights[feature] * features[feature])
         final[feature] = (weights[feature] * features[feature])
+    print("\n\n")
+    print(features)
+    print()
+    print(final)
     return score
 
 
@@ -494,6 +505,8 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
             for move in legal_moves:
                 new_state = game_state.generate_successor(agent, move)
                 response_val = self.expctimax(new_state, depth - 1, Computer)[0], move
+                print(move, response_val)
+                print()
                 max_val = max(max_val, response_val, key=costume_key)
             return max_val
 
