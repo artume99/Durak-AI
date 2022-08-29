@@ -448,7 +448,7 @@ def calculate_weights(weights, mult=1):
     weights["min card"] = 90 * mult
     weights["high triplets in hand"] = 20 * mult
     weights["cards on hand"] = 45 * mult
-    weights["last turn"] = 10000 * mult  # "inf" is not good! it evaluates the actions as "nan" and gives "STOP" action!
+    weights["last turn"] = 10000 * mult 
 
     # attacker features
     weights["lows on board"] = 10 * mult
