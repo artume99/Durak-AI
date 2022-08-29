@@ -25,6 +25,7 @@ class GameState:
         self._done = done
         self.card_in_play = card_in_play
         self.cards_on_board = cards_on_board if cards_on_board else []
+        self.last_action = None
 
         self.load_image_assets()
         self.back_image = self.deck.back_image.copy()
@@ -205,7 +206,6 @@ class GameState:
             self._switch_roles()
         elif action is Action.TAKE:
             self.defender.extend_hand(self.cards_on_board)
-            # self.attacker.extend_op_hand(self.cards_on_board) #todo: make it work
             self._replenish_cards(self.attacker)
             self._clear_board()
         else:  # Place card
@@ -282,6 +282,7 @@ class GameState:
                               cards_on_board=copy.copy(self.cards_on_board))
         successor.known_cards = known_cards
         successor.Opponent = self.Opponent
+        successor.last_action = action
         if agent_index == 0:
             successor.apply_agent_actions(action)
         elif agent_index == 1:
@@ -291,7 +292,8 @@ class GameState:
         return successor
 
     def __str__(self):
-        return f"Current Attacker: {self.attacker} \n" \
+        return f"Attacker hand : {self.attacker.hand} \n Defender hand; {self.defender.hand} \n" \
+               f"Current Attacker: {self.attacker} \n" \
                f"Cards on board {self.cards_on_board} \n" \
                f"Card in play {self.card_in_play} \n" \
                f"{self.deck} \n"

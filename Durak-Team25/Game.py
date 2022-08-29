@@ -2,6 +2,8 @@ import abc
 import copy
 import time
 from enum import Enum
+
+import Multi_Agents
 from Constants import *
 
 import pygame
@@ -38,7 +40,7 @@ class Agent(object):
 
     def extend_hand(self, cards):
         self.hand.extend(cards)
-        self.hand.sort()
+        self.hand.sort(reverse=True)
 
     def stop_running(self):
         pass
@@ -55,26 +57,25 @@ class RandomOpponentAgent(Agent):
         self.kozer_weight = kozer_weight
 
     # original Random op
-    def get_action(self, game_state):
-        legal_actions = game_state.get_opponent_legal_actions()
-        weights = np.array(self._weight_actions(
-            legal_actions)) / 100  # can be added as third param in the line below but seems uneeded
-        action = np.random.choice(legal_actions, 1, p=weights/np.sum(weights))[0]
-        return action
-
-
-    # Random op with tendency to choose the smallest card, if possible
     # def get_action(self, game_state):
-    #     card_actions = []
     #     legal_actions = game_state.get_opponent_legal_actions()
-    #     for action in legal_actions:
-    #         if type(action) == Card:
-    #             card_actions.append(action)
-    #     min_card_action = min(card_actions) if len(card_actions) else None
     #     weights = np.array(self._weight_actions(
     #         legal_actions)) / 100  # can be added as third param in the line below but seems uneeded
     #     action = np.random.choice(legal_actions, 1, p=weights/np.sum(weights))[0]
-    #     return min_card_action if min_card_action else action
+    #     return action
+
+    # Random op with tendency to choose the smallest card, if possible
+    def get_action(self, game_state):
+        card_actions = []
+        legal_actions = game_state.get_opponent_legal_actions()
+        for action in legal_actions:
+            if type(action) == Card:
+                card_actions.append(action)
+        min_card_action = min(card_actions) if len(card_actions) else None
+        weights = np.array(self._weight_actions(
+            legal_actions)) / 100  # can be added as third param in the line below but seems uneeded
+        action = np.random.choice(legal_actions, 1, p=weights/np.sum(weights))[0]
+        return min_card_action if min_card_action else action
 
     def _weight_actions(self, actions):
         weights = []
@@ -179,7 +180,7 @@ class Game:
             Logger.info("Current state is " + str(self._state))
             self._state.apply_attack_action(action)
             if self.sleep_between_actions:
-                time.sleep(1)
+                time.sleep(0.5)
             if self._state.done:
                 break
             if action in [Action.BETA, Action.TAKE]:
@@ -196,8 +197,7 @@ class Game:
 
             self._state.apply_defend_action(opponent_action)
             if self.sleep_between_actions:
-                time.sleep(1)
-
+                time.sleep(0.5)
         return self._state.looser
 
     def render(self):

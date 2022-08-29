@@ -149,7 +149,21 @@ def rank_on_board(game_state: GameState, card_rank: int):
     return cards_amount
 
 
-def high_triplets(game_state: GameState):
+def rank_in_hand(hand: List[Card], card_rank: int):
+    """
+    Calculates how many cards of a certain rank there are currently in hand
+    :param hand: Holding hand
+    :param card_rank: The desired rank
+    :return: int
+    """
+    cards_amount = 0
+    for card in hand:
+        if card.rank == card_rank:
+            cards_amount += 1
+    return cards_amount
+
+
+def high_triplets_board(game_state: GameState):
     """
     Is there a triplet of high card on the board?
     :param game_state: The current game state
@@ -157,6 +171,18 @@ def high_triplets(game_state: GameState):
     """
     for rank in HIGH_CARDS:
         if rank_on_board(game_state, rank) >= 3:
+            return True
+    return False
+
+
+def high_triplets_hand(hand: List[Card]):
+    """
+    Is there a triplet of high card in hand?
+    :param hand: Holding hand
+    :return: True if there is at least one triplet of high cards, False o.w.
+    """
+    for rank in HIGH_CARDS:
+        if rank_in_hand(hand, rank) >= 3:
             return True
     return False
 
@@ -264,6 +290,13 @@ def can_defend(op_card: Card, hand: List[Card]):
     return False
 
 
+def num_of_variety(game_state: GameState):
+    variety = set()
+    for card in game_state.cards_on_board:
+        variety.add(card.rank)
+    return len(variety)
+
+
 def weaknesses_count(game_state: GameState, hand: List[Card], op_hand: List[Card]):
     """
     Calculates the weak spots we have against the op, meaning: cards that we can't defend ourselves against
@@ -273,7 +306,7 @@ def weaknesses_count(game_state: GameState, hand: List[Card], op_hand: List[Card
     :return: int
     """
     known_op_hand = game_state.known_cards.intersection(op_hand)
-    weaknesses = len(op_hand) - len(known_op_hand)  #first of all, the diff between the cards there are in the op's
+    weaknesses = len(op_hand) - len(known_op_hand)  # first of all, the diff between the cards there are in the op's
     # hand and the cards that we know of is already a weakness
     for card in known_op_hand:
         if not can_defend(card, hand):
@@ -281,7 +314,8 @@ def weaknesses_count(game_state: GameState, hand: List[Card], op_hand: List[Card
     return weaknesses
 
 
-def strong_suit(game_state: GameState, suit, hand: List[Card], op_hand: List[Card]): #todo: figure out where should i use it
+def strong_suit(game_state: GameState, suit, hand: List[Card],
+                op_hand: List[Card]):  # todo: figure out where should i use it
     """
     Checks whether a certain suit is considered "strong", meaning that we have it but our op doesn't
     :param game_state: The current game state
@@ -302,7 +336,8 @@ def strong_suit(game_state: GameState, suit, hand: List[Card], op_hand: List[Car
     return True if (is_suit and not is_op_suit) else False
 
 
-def strong_suit_evaluation(game_state: GameState, hand: List[Card], op_hand: List[Card]): #todo: figure out where should i use it
+def strong_suit_evaluation(game_state: GameState, hand: List[Card],
+                           op_hand: List[Card]):  # todo: figure out where should i use it
     """
     Calculates the amount of strong suits we hold in our hand. Kozer-suit gets more recognition
     :param game_state: The current game state
@@ -314,7 +349,7 @@ def strong_suit_evaluation(game_state: GameState, hand: List[Card], op_hand: Lis
     for suit in SUITS:
         if strong_suit(game_state, suit, hand, op_hand):
             if game_state.is_suit_kozer(suit):
-                strong_suits += 4 #a kozer-strong-suit gets more recognition
+                strong_suits += 4  # a kozer-strong-suit gets more recognition
             else:
                 strong_suits += 1
     return strong_suits
@@ -331,16 +366,16 @@ def generate_hand_features(game_state: GameState, hand: List[Card], op_hand: Lis
     deck_amount = max(len(game_state.deck), 1)
     cards_amount = max(len(hand), 1)
     card_ranks, card_suits = get_hand_dicts(hand)
-    min_card = None if len(hand) == 0 else hand[-1]
+    min_card = None if len(hand) == 0 else min(hand)
     features["kozer amount"] = card_suits[suits[game_state.deck.kozer]]
     features["highs amount"] = highs_in_hand(hand)
-    features["num of cards"] = -len(hand) / deck_amount
+    features["num of cards"] = -len(hand)
     features["difference between hands"] = len(op_hand) - len(hand)
     features["mean rank"] = card_ranks.multiply_key_value() / cards_amount
     features["variance suit"] = card_suits.var()
     if min_card:
         features["min card"] = min_card.rank + 6 if min_card.is_kozer() else min_card.rank
-    features["high triplets in hand"] = 0  # todo
+    features["high triplets in hand"] = 1 if high_triplets_hand(hand) else 0
     if len(game_state.deck) < 6:
         features["cards on hand"] = -cards_amount / (36 * (len(game_state.deck) + 1))
         features["last turn"] = 1 if len(hand) == 0 else 0
@@ -354,15 +389,16 @@ def generate_attack_features(game_state: GameState, features: Counter):
     """
     deck_amount = max(len(game_state.deck), 1)
     # features["kozers percentage"] = -kozer_percentage(game_state)
-    features["lows on board"] = -individual_lows_on_board(game_state, True) / deck_amount # we prefer NOT to attack with
+    features["lows on board"] = -individual_lows_on_board(game_state, True)  # we prefer NOT to attack with
     # lows as the game proceeds
     features["defender's kozers"] = individual_kozers_on_board(game_state, False)  # as the attacker, it is good for me
     # if the enemy gets rid of kozers
     features["attacker's kozers"] = -individual_kozers_on_board(game_state, True)
-    features["highs percentage"] = -highs_percentage(game_state)
+    # features["highs percentage"] = -highs_percentage(game_state)
     features["defender's highs"] = individual_highs_on_board(game_state, False)
     features["attacker's highs"] = -individual_highs_on_board(game_state, True)
-    features["high triplets on board"] = -1 if high_triplets(game_state) else 1  # letting the defender hold onto a
+    features["high triplets on board"] = -1 if high_triplets_board(
+        game_state) else 1  # letting the defender hold onto a
     # triplet is far worse than bita
 
 
@@ -376,14 +412,14 @@ def generate_defend_features(game_state: GameState, hand: List[Card], op_hand: L
     """
     cards_on_board = len(game_state.cards_on_board)
     # todo: add a feature that takes in count the amount of high triplets: on board + in hand (keep it with low weight)
-    # features["variance rank on board"] = 0 if not game_state.cards_on_board else\
-    #     -np.var([card.rank for card in game_state.cards_on_board]) #todo: remind me why do we need a variaty of ranks??
+    features["variance rank on board"] = 0 if not game_state.cards_on_board else -num_of_variety(game_state)
     features["vulnerability"] = -weaknesses_count(game_state, hand, op_hand)
-    features["num of attacks rate"] = -math.pow(cards_on_board - 4, 2) #2 attacks are good for us, we get rid of
+    features["num of attacks rate"] = -math.pow(cards_on_board - 4, 2)  # 2 attacks are good for us, we get rid of
     # cards, but the more attacks there are - the bigger the chance we take everything
 
 
-def generate_op_hand_features(game_state: GameState, hand: List[Card], op_hand: List[Card], features: Counter): #todo: see if needed
+def generate_op_hand_features(game_state: GameState, hand: List[Card], op_hand: List[Card],
+                              features: Counter):  # todo: see if needed
     """
     gives features for evaluating our op hand (using the cards we ASSUME he holds)
     :param game_state:
@@ -393,7 +429,6 @@ def generate_op_hand_features(game_state: GameState, hand: List[Card], op_hand: 
     :return:
     """
     known_op_hand = game_state.known_cards.intersection(op_hand)
-
 
 
 def calculate_random_weights(weights: Counter):
@@ -408,31 +443,29 @@ def zero_weights(weights: Counter):
 
 def calculate_weights(weights, mult=1):
     # hand features
-    weights["kozer amount"] = 20 * mult
+    weights["kozer amount"] = 50 * mult
     weights["highs amount"] = 10 * mult
-    weights["num of cards"] = 100 * mult
+    weights["num of cards"] = 20 * mult
     weights["difference between hands"] = 15 * mult
-    weights["mean rank"] = 2 * mult
+    weights["mean rank"] = 12 * mult
     weights["variance suit"] = 7 * mult
-    weights["min card"] = 10 * mult
-    weights["high triplets in hand"] = 0 * mult  # todo
+    weights["min card"] = 90 * mult
+    weights["high triplets in hand"] = 20 * mult
     weights["cards on hand"] = 45 * mult
-    weights["last turn"] = 10000 * mult  # "inf" is not good! it evaluates the actions as "nan" and gives "STOP" action!
+    weights["last turn"] = 10000 * mult 
 
     # attacker features
-    weights["kozers percentage"] = 0 * mult #todo: useless?
-    weights["lows on board"] = 0 * mult
-    weights["defender's kozers"] = 0 * mult
-    weights["attacker's kozers"] = 10 * mult
-    weights["highs percentage"] = 0 * mult
-    weights["defender's highs"] = 0 * mult
-    weights["attacker's highs"] = 0 * mult
-    weights["high triplets on board"] = 0 * mult
+    weights["lows on board"] = 10 * mult
+    weights["defender's kozers"] = 45 * mult
+    weights["attacker's kozers"] = 55 * mult
+    weights["defender's highs"] = 50 * mult
+    weights["attacker's highs"] = 10 * mult
+    weights["high triplets on board"] = 10 * mult
 
     # defender features
-    weights["variance rank on board"] = 2 * mult #todo: remind me why do we need a variaty of ranks??
-    weights["vulnerability"] = 10 * mult
-    weights["num of attacks rate"] = 10 * mult
+    weights["variance rank on board"] = 30 * mult
+    weights["vulnerability"] = 72 * mult
+    weights["num of attacks rate"] = 41 * mult
 
 
 def base_evaluation(game_state: GameState):
@@ -455,11 +488,11 @@ def base_evaluation(game_state: GameState):
     for feature in features.keys():
         score += (weights[feature] * features[feature])
         final[feature] = (weights[feature] * features[feature])
-    print("\n\n")
-    print(features)
-    print()
-    print(final)
+    Actions[game_state.last_action] = score, final
     return score
+
+
+Actions = Counter()
 
 
 def genetic_evaluation(game_state: GameState, weights: Counter):
@@ -512,8 +545,6 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
             for move in legal_moves:
                 new_state = game_state.generate_successor(agent, move)
                 response_val = self.expctimax(new_state, depth - 1, Computer)[0], move
-                print(move, response_val)
-                print()
                 max_val = max(max_val, response_val, key=costume_key)
             return max_val
 
