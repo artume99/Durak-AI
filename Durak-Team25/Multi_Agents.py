@@ -366,7 +366,7 @@ def generate_hand_features(game_state: GameState, hand: List[Card], op_hand: Lis
     deck_amount = max(len(game_state.deck), 1)
     cards_amount = max(len(hand), 1)
     card_ranks, card_suits = get_hand_dicts(hand)
-    min_card = None if len(hand) == 0 else min(hand)
+    min_card = None if len(hand) == 0 else max(hand)
     features["kozer amount"] = card_suits[suits[game_state.deck.kozer]]
     features["highs amount"] = highs_in_hand(hand)
     features["num of cards"] = -len(hand)

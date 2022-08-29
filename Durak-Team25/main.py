@@ -119,7 +119,7 @@ def main():
     agents = ["KeyboardAgent", 'ExpectimaxAgent', "MinimaxAgent", "AlphaBetaAgent", "GeneticAgent",
               "RandomOpponentAgent"]
 
-    parser.add_argument('--agent', choices=agents, help='The agent.', default=agents[4], type=str)
+    parser.add_argument('--agent', choices=agents, help='The agent.', default=agents[0], type=str)
 
     parser.add_argument('--depth', help='The maximum depth for to search in the game tree.', default=2, type=int)
     parser.add_argument('--sleep_between_actions', help='Should sleep between actions.', default=False, type=bool)
@@ -130,7 +130,7 @@ def main():
     parser.add_argument('--mutation_strength', help='Strength of a mutation.', default=2, type=int)
     parser.add_argument('--evaluation_function', help='The evaluation function for ai agent.',
                         default='score_evaluation_function', type=str)
-    parser.add_argument('--opponent', help='Opponent to play against', default=agents[-1], type=str)
+    parser.add_argument('--opponent', help='Opponent to play against', default=agents[3], type=str)
 
     args = parser.parse_args()
     numpy.random.seed(args.random_seed)
