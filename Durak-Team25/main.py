@@ -149,7 +149,7 @@ def main():
         # calculate_weights(parentB, 0.5)
 
         calculate_random_weights(parentA)
-        calculate_random_weights(parentB)
+        zero_weights(parentB)
 
         for gen in range(args.num_of_generations):
             offspring_score = dict()
