@@ -2,6 +2,8 @@ import abc
 import copy
 import time
 from enum import Enum
+
+import Multi_Agents
 from Constants import *
 
 import pygame
@@ -178,7 +180,7 @@ class Game:
             Logger.info("Current state is " + str(self._state))
             self._state.apply_attack_action(action)
             if self.sleep_between_actions:
-                time.sleep(1)
+                time.sleep(0.5)
             if self._state.done:
                 break
             if action in [Action.BETA, Action.TAKE]:
@@ -195,8 +197,8 @@ class Game:
 
             self._state.apply_defend_action(opponent_action)
             if self.sleep_between_actions:
-                time.sleep(1)
-
+                time.sleep(0.5)
+        print(Multi_Agents.Actions)
         return self._state.looser
 
     def render(self):
