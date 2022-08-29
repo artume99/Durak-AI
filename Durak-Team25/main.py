@@ -98,6 +98,8 @@ def create_offspring(p1: Counter, p2: Counter, args):
                 offspring[i] *= args.mutation_strength
             else:
                 offspring[i] /= args.mutation_strength
+                if offspring[i] < 1:
+                    offspring[i] = 0
     Logger.info(str(offspring))
     print(offspring)
     return offspring
@@ -116,13 +118,15 @@ def main():
                         type=int)
     agents = ["KeyboardAgent", 'ExpectimaxAgent', "MinimaxAgent", "AlphaBetaAgent", "GeneticAgent",
               "RandomOpponentAgent"]
-    parser.add_argument('--agent', choices=agents, help='The agent.', default=agents[3], type=str)
+
+    parser.add_argument('--agent', choices=agents, help='The agent.', default=agents[4], type=str)
+
     parser.add_argument('--depth', help='The maximum depth for to search in the game tree.', default=2, type=int)
     parser.add_argument('--sleep_between_actions', help='Should sleep between actions.', default=False, type=bool)
     parser.add_argument('--num_of_games', help='The number of games to run.', default=2, type=int)
-    parser.add_argument('--num_of_generations', help='The number of generations to run.', default=3, type=int)
-    parser.add_argument('--num_of_offsprings', help='The number of offsprings to spawn.', default=2, type=int)
-    parser.add_argument('--mutation_coef', help='Chance of a mutation occuring.', default=0.05, type=int)
+    parser.add_argument('--num_of_generations', help='The number of generations to run.', default=2, type=int)
+    parser.add_argument('--num_of_offsprings', help='The number of offsprings to spawn.', default=4, type=int)
+    parser.add_argument('--mutation_coef', help='Chance of a mutation occuring.', default=0.005, type=int)
     parser.add_argument('--mutation_strength', help='Strength of a mutation.', default=2, type=int)
     parser.add_argument('--evaluation_function', help='The evaluation function for ai agent.',
                         default='score_evaluation_function', type=str)
@@ -149,36 +153,48 @@ def main():
         # calculate_weights(parentB, 0.5)
 
         calculate_random_weights(parentA)
-        calculate_random_weights(parentB)
+        zero_weights(parentB)
+
+        first_gen_score = 0
+        best_score = 0
+        for parent in [parentA, parentB]:
+            agent = GeneticAgent(parent)
+            score = run_games(args, agent)
+            first_gen_score += score
+            if score > best_score:
+                best_score = score
+        first_gen_score /= 2
+        Logger.add_genetic_table_entry(seed=args.random_seed, num_of_games=args.num_of_games,
+                                       num_of_generations=args.num_of_generations,
+                                       num_of_offsprings=args.num_of_offsprings, mutation_coef=args.mutation_coef,
+                                       mutation_strength=args.mutation_strength, current_gen=0, score=best_score,
+                                       gen_score=first_gen_score)
 
         for gen in range(args.num_of_generations):
             offspring_score = dict()
+            Logger.info("generation: " + str(gen + 1))
+            print("generation: " + str(gen + 1))
+            gen_score = 0
             for ind, offspring in enumerate(
                     create_offsprings(args, parentA, parentB)):
                 agent = GeneticAgent(offspring)
                 score = run_games(args, agent)
+                gen_score += score
                 offspring_score[ind] = (offspring, score)
-            sorted(offspring_score.items(), key=lambda item: item[1][1])
-            data = list(offspring_score.keys())
-            parentA, parentB = offspring_score[data[0]][0], \
-                               offspring_score[data[1]][0]
-            score = offspring_score[data[0]][1]
+            sorted_offsprings = dict(sorted(offspring_score.items(), key=lambda item: item[1][1]))
+            data = list(sorted_offsprings.keys())
+            parentA, parentB = sorted_offsprings[data[-1]][0], \
+                               sorted_offsprings[data[-2]][0]
+            score = offspring_score[data[-1]][1]
+            gen_score /= args.num_of_offsprings
+            Logger.info("Average score of Gen: " + str(gen_score))
             Logger.add_genetic_table_entry(seed=args.random_seed, num_of_games=args.num_of_games,
                                            num_of_generations=args.num_of_generations,
                                            num_of_offsprings=args.num_of_offsprings, mutation_coef=args.mutation_coef,
-                                           mutation_strength=args.mutation_strength, current_gen=gen + 1, score=score)
-            Logger.info("generation: " + str(gen + 1))
-            print("generation: " + str(gen + 1))
+                                           mutation_strength=args.mutation_strength, current_gen=gen + 1, score=score,
+                                           gen_score=gen_score)
 
-        # get final offspring
-        # for ind, offspring in enumerate([parentA, parentB]):
-        #     agent = GeneticAgent(offspring)
-        #     score = run_games(args, agent)
-        #     offspring_score[ind] = (offspring, score)
-        #     sorted(offspring_score.items(), key=lambda item: item[1][1])
-        #     data = list(offspring_score.keys())
-        # hes the best, around
-        rocky, score = offspring_score[data[0]][0], offspring_score[data[0]][1]
+        rocky, score = offspring_score[data[-1]][0], offspring_score[data[-1]][1]
 
         # with open(, 'wb') as f:
         #     pickle.dump(won_games, f)
