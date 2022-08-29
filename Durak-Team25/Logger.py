@@ -9,7 +9,7 @@ class Logger:
         os.mkdir("Logs")
     log = open(f"Logs/Log_{now}.txt", "a")
     columns = ["seed", "num_of_games", "num_of_generations", "num_of_offsprings", "mutation_coef",
-               "mutation_strength", "current_gen", "score"]
+               "mutation_strength", "current_gen", "score", "gen_score"]
     genetic_table = pd.DataFrame(columns=columns)
 
     @staticmethod
@@ -18,9 +18,9 @@ class Logger:
 
     @staticmethod
     def add_genetic_table_entry(seed, num_of_games, num_of_generations, num_of_offsprings, mutation_coef,
-                                mutation_strength, current_gen, score):
+                                mutation_strength, current_gen, score, gen_score):
         to_add = [seed, num_of_games, num_of_generations, num_of_offsprings, mutation_coef,
-                  mutation_strength, current_gen, score]
+                  mutation_strength, current_gen, score, gen_score]
         Logger.genetic_table.loc[len(Logger.genetic_table)] = to_add
 
     @staticmethod
