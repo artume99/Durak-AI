@@ -290,6 +290,13 @@ def can_defend(op_card: Card, hand: List[Card]):
     return False
 
 
+def num_of_variety(game_state: GameState):
+    variety = set()
+    for card in game_state.cards_on_board:
+        variety.add(card.rank)
+    return len(variety)
+
+
 def weaknesses_count(game_state: GameState, hand: List[Card], op_hand: List[Card]):
     """
     Calculates the weak spots we have against the op, meaning: cards that we can't defend ourselves against
@@ -402,8 +409,7 @@ def generate_defend_features(game_state: GameState, hand: List[Card], op_hand: L
     """
     cards_on_board = len(game_state.cards_on_board)
     # todo: add a feature that takes in count the amount of high triplets: on board + in hand (keep it with low weight)
-    # features["variance rank on board"] = 0 if not game_state.cards_on_board else\
-    #     -np.var([card.rank for card in game_state.cards_on_board]) #todo: remind me why do we need a variaty of ranks??
+    features["variance rank on board"] = 0 if not game_state.cards_on_board else -num_of_variety(game_state)
     features["vulnerability"] = -weaknesses_count(game_state, hand, op_hand)
     features["num of attacks rate"] = -math.pow(cards_on_board - 4, 2) #2 attacks are good for us, we get rid of
     # cards, but the more attacks there are - the bigger the chance we take everything
@@ -443,14 +449,14 @@ def calculate_weights(weights, mult=1):
 
     # attacker features
     weights["lows on board"] = 15 * mult
-    weights["defender's kozers"] = 0 * mult
-    weights["attacker's kozers"] = 10 * mult
-    weights["defender's highs"] = 0 * mult
-    weights["attacker's highs"] = 0 * mult
-    weights["high triplets on board"] = 0 * mult
+    weights["defender's kozers"] = 12 * mult
+    weights["attacker's kozers"] = 8 * mult
+    weights["defender's highs"] = 12 * mult
+    weights["attacker's highs"] = 8 * mult
+    weights["high triplets on board"] = 10 * mult
 
     # defender features
-    weights["variance rank on board"] = 2 * mult #todo: remind me why do we need a variaty of ranks??
+    weights["variance rank on board"] = 40 * mult
     weights["vulnerability"] = 10 * mult
     weights["num of attacks rate"] = 10 * mult
 
