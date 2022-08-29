@@ -198,7 +198,6 @@ class Game:
             self._state.apply_defend_action(opponent_action)
             if self.sleep_between_actions:
                 time.sleep(0.5)
-        print(Multi_Agents.Actions)
         return self._state.looser
 
     def render(self):
