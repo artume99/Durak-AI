@@ -145,8 +145,11 @@ def main():
 
     if args.agent == "GeneticAgent":
         parentA, parentB = Counter(), Counter()
-        calculate_weights(parentA, 2)
-        calculate_weights(parentB, 0.5)
+        # calculate_weights(parentA, 2)
+        # calculate_weights(parentB, 0.5)
+
+        calculate_random_weights(parentA)
+        calculate_random_weights(parentB)
 
         for gen in range(args.num_of_generations):
             offspring_score = dict()

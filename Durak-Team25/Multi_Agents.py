@@ -30,6 +30,7 @@ from Constants import *
 Player = 0
 Computer = 1
 
+
 class KeyboardAgent(Agent):
     """
     An agent controlled by the keyboard.
@@ -394,12 +395,14 @@ def generate_op_hand_features(game_state: GameState, hand: List[Card], op_hand: 
     known_op_hand = game_state.known_cards.intersection(op_hand)
 
 
-def calculate_weights(weights: Counter, mult=1):
-    """
-    A place to control the weights that we grant to each of the features listed in the functions above
-    :param weights: A weights dict
-    :param mult: todo
-    """
+
+def calculate_random_weights(weights: Counter):
+    calculate_weights(weights)
+    for key, value in weights.items():
+        weights[key] = np.random.randint(0, 100)  # maybe random.uniform is better
+
+
+def calculate_weights(weights, mult=1):
     # hand features
     weights["kozer amount"] = 20 * mult
     weights["highs amount"] = 10 * mult
@@ -611,7 +614,7 @@ class GeneticAgent(MinmaxAgent):
         # endregion
 
         # region  if isMinNode then return min
-        if agent ==Computer:
+        if agent == Computer:
             legal_moves = game_state.get_legal_actions(agent)
             min_val = (float("inf"), Action.STOP)
             for move in legal_moves:
