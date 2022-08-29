@@ -401,6 +401,10 @@ def calculate_random_weights(weights: Counter):
     for key, value in weights.items():
         weights[key] = np.random.randint(0, 100)  # maybe random.uniform is better
 
+def zero_weights(weights: Counter):
+    calculate_weights(weights)
+    for key, value in weights.items():
+        weights[key] = 0
 
 def calculate_weights(weights, mult=1):
     # hand features
