@@ -492,6 +492,29 @@ def base_evaluation(game_state: GameState):
     return score
 
 
+def itch_evaluation(game_state: GameState):
+    pygame.event.pump()
+    features = Counter()
+    if game_state.is_attacking(Player):
+        hand, op_hand = game_state.attacker.hand, game_state.defender.hand
+        generate_attack_features(game_state, features)
+    else:
+        op_hand, hand = game_state.attacker.hand, game_state.defender.hand
+        generate_defend_features(game_state, hand, op_hand, features)
+    generate_hand_features(game_state, hand, op_hand, features)
+    # features.normalize()
+
+    weights = {'kozer amount': 0, 'highs amount': 1.5, 'num of cards': 0, 'difference between hands': 4.0, 'mean rank': 0, 'variance suit': 0, 'min card': 40.0, 'high triplets in hand': 23, 'cards on hand': 29.5, 'last turn': 0, 'kozers percentage': 7, 'lows on board': 71, "defender's kozers": 90, "attacker's kozers": 0, 'highs percentage': 0, "defender's highs": 90, "attacker's highs": 32.5, 'high triplets on board': 87, 'variance rank on board': 0, 'vulnerability': 36.0, 'num of attacks rate': 0}
+
+    score = 0
+    final = {}
+    for feature in features.keys():
+        score += (weights[feature] * features[feature])
+        final[feature] = (weights[feature] * features[feature])
+    Actions[game_state.last_action] = score, final
+    return score
+
+
 Actions = Counter()
 
 
@@ -516,7 +539,7 @@ def genetic_evaluation(game_state: GameState, weights: Counter):
 
 
 class MultiAgentSearchAgent(Agent):
-    def __init__(self, evaluation_function=base_evaluation, depth=1):
+    def __init__(self, evaluation_function=itch_evaluation, depth=1):
         super().__init__()
         self.evaluation_function = evaluation_function
         self.depth = depth
