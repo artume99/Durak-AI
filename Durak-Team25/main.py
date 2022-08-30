@@ -7,7 +7,7 @@ import numpy
 import pygame
 from Multi_Agents import *
 from Deck import Deck
-from Game import Game, RandomOpponentAgent
+from Game import Game, RandomOpponentAgent, MinActionOpponentAgent
 from GameState import GameState
 from Constants import *
 import util
@@ -70,6 +70,7 @@ def create_agent(args, weights=None):
         #     self.last_game_wins = pickle.load(f)
     return agent
 
+
 def create_opponent(args):
     if args.opponent == "ExpectimaxAgent":
         op = ExpectimaxAgent(depth=args.depth)
@@ -81,6 +82,8 @@ def create_opponent(args):
         op = AlphaBetaAgent(depth=args.depth)
     elif args.opponent == "RandomOpponentAgent":
         op = RandomOpponentAgent()
+    elif args.opponent == "MinActionOpponentAgent":
+        op = MinActionOpponentAgent()
     else:
         raise Exception("Can't do")
     return op
@@ -117,20 +120,24 @@ def main():
     parser.add_argument('--random_seed', help='The seed for the random state.', default=numpy.random.randint(100),
                         type=int)
     agents = ["KeyboardAgent", 'ExpectimaxAgent', "MinimaxAgent", "AlphaBetaAgent", "GeneticAgent",
-              "RandomOpponentAgent"]
+              "MinActionOpponentAgent", "RandomOpponentAgent"]
 
-    parser.add_argument('--agent', choices=agents, help='The agent.', default=agents[0], type=str)
+    parser.add_argument('--agent', choices=agents, help='The agent.', default=agents[4], type=str)
 
-    parser.add_argument('--depth', help='The maximum depth for to search in the game tree.', default=2, type=int)
+    parser.add_argument('--depth', help='The maximum depth for to search in the game tree.', default=1, type=int)
     parser.add_argument('--sleep_between_actions', help='Should sleep between actions.', default=False, type=bool)
-    parser.add_argument('--num_of_games', help='The number of games to run.', default=2, type=int)
-    parser.add_argument('--num_of_generations', help='The number of generations to run.', default=2, type=int)
-    parser.add_argument('--num_of_offsprings', help='The number of offsprings to spawn.', default=4, type=int)
-    parser.add_argument('--mutation_coef', help='Chance of a mutation occuring.', default=0.005, type=int)
+    parser.add_argument('--num_of_games', help='The number of games to run.', default=10, type=int)
+    parser.add_argument('--num_of_generations', help='The number of generations to run.', default=10, type=int)
+    parser.add_argument('--num_of_offsprings', help='The number of offsprings to spawn.', default=5, type=int)
+    parser.add_argument('--mutation_coef', help='Chance of a mutation occuring.', default=0, type=float)
     parser.add_argument('--mutation_strength', help='Strength of a mutation.', default=2, type=int)
     parser.add_argument('--evaluation_function', help='The evaluation function for ai agent.',
                         default='score_evaluation_function', type=str)
+<<<<<<< Updated upstream
     parser.add_argument('--opponent', help='Opponent to play against', default=agents[-1], type=str)
+=======
+    parser.add_argument('--opponent', help='Opponent to play against', default=agents[-2], type=str)
+>>>>>>> Stashed changes
 
     args = parser.parse_args()
     numpy.random.seed(args.random_seed)
@@ -143,7 +150,7 @@ def main():
         Multi_Agents.Player = 0
         Multi_Agents.Computer = 1
 
-    if args.agent != "KeyboardAgent" and args.opponent != "RandomOpponentAgent":
+    if args.agent != "KeyboardAgent" and (args.opponent != "RandomOpponentAgent" and args.opponent != "MinActionOpponentAgent"):
         print("Only keyboard is allowed against AI currently", file=sys.stderr)
         exit(1)
 
@@ -223,6 +230,14 @@ def run_games(args, agent):
         print("looser is ", looser)
 
     Logger.info(f"You won {won_games}/{args.num_of_games} games ")
+    if args.agent == "ExpectimaxAgent":
+        Logger.add_expecti_table_entry(seed=args.random_seed, depth=args.depth, win_rate=won_games / args.num_of_games,
+                                       num_of_game=args.num_of_games, opponent=args.opponent)
+
+    elif args.agent == "AlphaBetaAgent":
+        Logger.add_alpha_table_entry(seed=args.random_seed, depth=args.depth, win_rate=won_games / args.num_of_games,
+                                     num_of_game=args.num_of_games, opponent=args.opponent)
+
     print(f"You won {won_games}/{args.num_of_games} games ")
     return won_games / args.num_of_games
 

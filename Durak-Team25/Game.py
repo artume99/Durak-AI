@@ -46,6 +46,51 @@ class Agent(object):
         pass
 
 
+class MinActionOpponentAgent(Agent):
+    """
+       The opponent
+       """
+
+    def __init__(self, initial_cards=None, passive_action_weight=10, kozer_weight=10):
+        super().__init__(initial_cards)
+        self.passive_action_weight = passive_action_weight
+        self.kozer_weight = kozer_weight
+
+    # Random op with tendency to choose the smallest card, if possible
+    def get_action(self, game_state):
+        card_actions = []
+        legal_actions = game_state.get_opponent_legal_actions()
+        for action in legal_actions:
+            if type(action) == Card:
+                card_actions.append(action)
+        min_card_action = min(card_actions) if len(card_actions) else None
+        weights = np.array(self._weight_actions(
+            legal_actions)) / 100  # can be added as third param in the line below but seems uneeded
+        action = np.random.choice(legal_actions, 1, p=weights/np.sum(weights))[0]
+        return min_card_action if min_card_action else action
+
+    def _weight_actions(self, actions):
+        weights = []
+        # if there are a lot of action, each action which is not BETA, TAKE has a big value
+        base_weight = len(actions) * 10
+        for action in actions:
+            if action in [Action.BETA, Action.TAKE]:
+                weights.append(self.passive_action_weight)
+            elif action.is_kozer():
+                weights.append(self.kozer_weight)
+            else:
+                weights.append(base_weight)
+        return weights
+
+    def copy(self):
+        new_agent = MinActionOpponentAgent()
+        new_hand = []
+        for card in self.hand:
+            new_hand.append(card.copy())
+        new_agent.hand = new_hand
+        return new_agent
+
+
 class RandomOpponentAgent(Agent):
     """
     The opponent
@@ -61,21 +106,8 @@ class RandomOpponentAgent(Agent):
         legal_actions = game_state.get_opponent_legal_actions()
         weights = np.array(self._weight_actions(
             legal_actions)) / 100  # can be added as third param in the line below but seems uneeded
-        action = np.random.choice(legal_actions, 1, p=weights/np.sum(weights))[0]
+        action = np.random.choice(legal_actions, 1, p=weights / np.sum(weights))[0]
         return action
-
-    # Random op with tendency to choose the smallest card, if possible
-    # def get_action(self, game_state):
-    #     card_actions = []
-    #     legal_actions = game_state.get_opponent_legal_actions()
-    #     for action in legal_actions:
-    #         if type(action) == Card:
-    #             card_actions.append(action)
-    #     min_card_action = min(card_actions) if len(card_actions) else None
-    #     weights = np.array(self._weight_actions(
-    #         legal_actions)) / 100  # can be added as third param in the line below but seems uneeded
-    #     action = np.random.choice(legal_actions, 1, p=weights/np.sum(weights))[0]
-    #     return min_card_action if min_card_action else action
 
     def _weight_actions(self, actions):
         weights = []

@@ -11,6 +11,8 @@ class Logger:
     columns = ["seed", "num_of_games", "num_of_generations", "num_of_offsprings", "mutation_coef",
                "mutation_strength", "current_gen", "score", "gen_score"]
     genetic_table = pd.DataFrame(columns=columns)
+    alpha_table = pd.DataFrame(columns=["depth", "win_rate", "num_of_game", "Opponent"])
+    expecti_table = pd.DataFrame(columns=["depth", "win_rate", "num_of_game", "Opponent"])
 
     @staticmethod
     def info(message: str):
@@ -22,6 +24,18 @@ class Logger:
         to_add = [seed, num_of_games, num_of_generations, num_of_offsprings, mutation_coef,
                   mutation_strength, current_gen, score, gen_score]
         Logger.genetic_table.loc[len(Logger.genetic_table)] = to_add
+
+    @staticmethod
+    def add_alpha_table_entry(seed,depth, win_rate, num_of_game, opponent):
+        alpha_table = pd.DataFrame(columns=["depth", "win_rate", "num_of_game", "Opponent"])
+        alpha_table.loc[len(alpha_table)] = [depth, win_rate, num_of_game, opponent]
+        alpha_table.to_csv(f"Logs/AlphaBeta_{seed}", mode="a", index=False, header=False)
+
+    @staticmethod
+    def add_expecti_table_entry(seed, depth, win_rate, num_of_game, opponent):
+        expecti_table = pd.DataFrame(columns=["depth", "win_rate", "num_of_game", "Opponent"])
+        expecti_table.loc[len(expecti_table)] = [depth, win_rate, num_of_game, opponent]
+        expecti_table.to_csv(f"Logs/Expectimax_{seed}", mode="a", index=False, header=False)
 
     @staticmethod
     def write_to_log():
