@@ -1,0 +1,16 @@
+Hello!
+This is an AI project by: Yam Fine, Artume Pichersky, Miryam Yakubov, Nadav Finkel
+
+We have implemented MiniMax algorithms (AlphaBetPruning, ExpectiMax, Minimax) along side with a Genetic
+Algorithm.
+There are quiet a few parameters to play around with, feel free to explore them with -h.
+
+Instructions:
+1. unzip Durak-AI-main.zip
+2. cd Durak-AI-main/Durak-Team25
+3. python3 main.py
+
+Here are some execution examples:
+1. Play against AI : python3 main.py --opponent ExpectimaxAgent --depth 2
+2. Explore AI work : python3 main.py --agent ExpectimaxAgent --depth 2
+3. Genetic as shown in the video : python3 main.py --random_seed 47 --agent GeneticAgent --num_of_games 2 --num_of_generations 4 --num_of_offsprings 2
