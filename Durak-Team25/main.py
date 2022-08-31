@@ -124,12 +124,12 @@ def main():
 
     parser.add_argument('--agent', choices=agents, help='The agent.', default=agents[0], type=str)
 
-    parser.add_argument('--depth', help='The maximum depth for to search in the game tree.', default=1, type=int)
+    parser.add_argument('--depth', help='The maximum depth for to search in the game tree.', default=2, type=int)
     parser.add_argument('--sleep_between_actions', help='Should sleep between actions.', default=False, type=bool)
     parser.add_argument('--num_of_games', help='The number of games to run.', default=10, type=int)
     parser.add_argument('--num_of_generations', help='The number of generations to run.', default=10, type=int)
-    parser.add_argument('--num_of_offsprings', help='The number of offsprings to spawn.', default=5, type=int)
-    parser.add_argument('--mutation_coef', help='Chance of a mutation occuring.', default=0, type=float)
+    parser.add_argument('--num_of_offsprings', help='The number of offsprings to spawn.', default=3, type=int)
+    parser.add_argument('--mutation_coef', help='Chance of a mutation occuring.', default=0.005, type=float)
     parser.add_argument('--mutation_strength', help='Strength of a mutation.', default=2, type=int)
     parser.add_argument('--evaluation_function', help='The evaluation function for ai agent.',
                         default='score_evaluation_function', type=str)
