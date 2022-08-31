@@ -133,11 +133,8 @@ def main():
     parser.add_argument('--mutation_strength', help='Strength of a mutation.', default=2, type=int)
     parser.add_argument('--evaluation_function', help='The evaluation function for ai agent.',
                         default='score_evaluation_function', type=str)
-<<<<<<< Updated upstream
     parser.add_argument('--opponent', help='Opponent to play against', default=agents[-1], type=str)
-=======
-    parser.add_argument('--opponent', help='Opponent to play against', default=agents[-2], type=str)
->>>>>>> Stashed changes
+   
 
     args = parser.parse_args()
     numpy.random.seed(args.random_seed)
