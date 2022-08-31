@@ -122,7 +122,7 @@ def main():
     agents = ["KeyboardAgent", 'ExpectimaxAgent', "MinimaxAgent", "AlphaBetaAgent", "GeneticAgent",
               "MinActionOpponentAgent", "RandomOpponentAgent"]
 
-    parser.add_argument('--agent', choices=agents, help='The agent.', default=agents[4], type=str)
+    parser.add_argument('--agent', choices=agents, help='The agent.', default=agents[0], type=str)
 
     parser.add_argument('--depth', help='The maximum depth for to search in the game tree.', default=1, type=int)
     parser.add_argument('--sleep_between_actions', help='Should sleep between actions.', default=False, type=bool)
